@@ -1,0 +1,79 @@
+<div class="punwave-layout mdl-layout mdl-layout--fixed-header mdl-js-layout mdl-color--grey-100">
+  <header class="punwave-header mdl-layout__header mdl-layout__header--scroll mdl-color--grey-100 mdl-color-text--grey-800">
+    <div class="mdl-layout__header-row">
+      <img src="/img/brand.png" alt="Punwave">
+      <span class="mdl-layout-title">Punwave</span>
+    </div>
+  </header>
+  <div class="punwave-ribbon"></div>
+  <main class="punwave-main mdl-layout__content">
+    <div class="punwave-container mdl-grid">
+      <div class="mdl-cell mdl-cell--2-col"></div>
+      <div class="punwave-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grey-800 mdl-cell mdl-cell--8-col mdl-typography--text-center">
+        <img src="/img/punwave.png" alt="Punwave" style="width: 180px">
+        <p><%= message %></p>
+        <% errors.forEach(function (error) { %>
+          <p><%= error.message %></p>
+        <% }) %>
+        <form method="POST">
+          <div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="text" name="firstName" id="firstName">
+              <label class="mdl-textfield__label" for="firstName">First Name</label>
+              <span class="mdl-textfield__error">This is required.</span>
+            </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="text" name="lastName" id="lastName">
+              <label class="mdl-textfield__label" for="lastName">Last Name</label>
+              <span class="mdl-textfield__error">This is required.</span>
+            </div>
+          </div>
+          <div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="text" name="username" id="username">
+              <label class="mdl-textfield__label" for="username">Username</label>
+              <span class="mdl-textfield__error">This is required.</span>
+            </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="email" name="email" id="email">
+              <label class="mdl-textfield__label" for="email">Email</label>
+              <span class="mdl-textfield__error">Please enter a valid email address.</span>
+            </div>
+          </div>
+          <div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="password" name="password" id="password">
+              <label class="mdl-textfield__label" for="password">Password</label>
+              <span class="mdl-textfield__error">This is required.</span>
+            </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="password" name="confirm" id="confirm">
+              <label class="mdl-textfield__label" for="confirm">Confirm Password</label>
+              <span class="mdl-textfield__error">This is required.</span>
+            </div>
+          </div>
+          <div class="form-actions">
+            <p><button type="submit" class="mdl-button mdl-button--primary mdl-js-button mdl-button--raised mdl-js-ripple-effect">Sign Up</button></p>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="mdl-layout-spacer"></div>
+    <footer class="punwave-footer mdl-mini-footer">
+      <div class="mdl-title"></div>
+      <div>© 2016 Wavenet Technology Company Limited.</div>
+    </footer>
+  </main>
+</div>
+<script>
+  $(".mdl-textfield__input").blur(function (){
+    if( !this.value ){
+      $(this).prop('required', true);
+      $(this).parent().addClass('is-invalid');
+    }
+  });
+  $(".mdl-button[type='submit']").click(function (event){
+    $(this).siblings(".mdl-textfield").addClass('is-invalid');
+    $(this).siblings(".mdl-textfield").children(".mdl-textfield__input").prop('required', true);
+  });
+</script>
