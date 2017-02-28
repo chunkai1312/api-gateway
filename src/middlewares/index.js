@@ -2,9 +2,12 @@ import morgan from 'morgan'
 import compression from 'compression'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
+import session from 'express-session'
+import flash from 'express-flash'
 import cors from 'cors'
 import helmet from 'helmet'
 import methodOverride from 'method-override'
+import passport from 'passport'
 import { compose } from 'compose-middleware'
 import expressWinston from 'express-winston'
 import config from '../config'
@@ -17,16 +20,21 @@ const logger = (config.env === 'development')
 const middlewares = [
   logger(),
   compression(),
-  bodyParser.urlencoded({ extended: false }),
-  bodyParser.json(),
   cookieParser(),
+  session(config.session),
   cors(),
   helmet(),
-  methodOverride()
+  methodOverride(),
+  flash(),
+  bodyParser.urlencoded({ extended: false }),
+  bodyParser.json(),
+  passport.initialize(),
+  passport.session()
 ]
 
 if (config.env === 'test') middlewares.shift()
 
 export errorHandler from './errorhandler'
-export notFound from './notfound'
+export validator from './validator'
+
 export default () => compose(middlewares)
