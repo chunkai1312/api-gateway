@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import jwt from 'jsonwebtoken'
 import { uid } from 'rand-token'
 import config from '../config'
 
@@ -28,14 +29,20 @@ OAuthTokenSchema.virtual('expiresIn').get(function () {
 
 OAuthTokenSchema.pre('save', function (next) {
   if (!this.isNew) return next()
+
   this.tokenType = config.oauth2.tokenType
-  this.accessToken = uid(config.oauth2.accessToken.length)
+  this.accessToken = (config.oauth2.accessToken.isJWT)
+    ? jwt.sign(this.user, config.jwt.secret, { expiresIn: config.oauth2.accessToken.expiresIn })
+    : uid(config.oauth2.accessToken.length)
+
   this.expiresAt = new Date(
     this.createdAt.getTime() + config.oauth2.accessToken.expiresIn * 1000
   )
+
   if (this.refreshToken === null) return next()
+
   this.refreshToken = uid(config.oauth2.refreshToken.length)
-  return next()
+  next()
 })
 
 OAuthTokenSchema.statics = {
