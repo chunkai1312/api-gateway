@@ -3,6 +3,8 @@ import compression from 'compression'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import session from 'express-session'
+import Redis from 'ioredis'
+import connectRedis from 'connect-redis'
 import flash from 'express-flash'
 import cors from 'cors'
 import helmet from 'helmet'
@@ -13,6 +15,10 @@ import expressWinston from 'express-winston'
 import config from '../config'
 import winstonInstance from '../config/logger'
 
+const RedisStore = connectRedis(session)
+const redis = new Redis(config.redis.port, config.redis.host)
+const sessionConfig = { ...config.session, store: new RedisStore({ client: redis }) }
+
 const logger = (config.env === 'development')
   ? () => morgan('dev')
   : () => expressWinston.logger({ winstonInstance })
@@ -21,7 +27,7 @@ const middlewares = [
   logger(),
   compression(),
   cookieParser(),
-  session(config.session),
+  session(sessionConfig),
   cors(),
   helmet(),
   methodOverride(),
@@ -35,6 +41,8 @@ const middlewares = [
 if (config.env === 'test') middlewares.shift()
 
 export errorHandler from './errorhandler'
+export httpProxy from './proxy'
+export auth from './auth'
 export validator from './validator'
 
 export default () => compose(middlewares)
