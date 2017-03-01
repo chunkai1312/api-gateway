@@ -1,10 +1,8 @@
-import 'babel-polyfill'
-
 import path from 'path'
 import express from 'express'
 import ejs from 'ejs'
 import expressLayouts from 'express-ejs-layouts'
-import middlewares, { errorHandler } from './middlewares'
+import middlewares, { httpProxy, errorHandler } from './middlewares'
 import routes from './routes'
 import connectMongoDB from './config/mongoose'
 import setupPassport from './config/passport'
@@ -13,6 +11,8 @@ connectMongoDB()
 setupPassport()
 
 const app = express()
+
+httpProxy(app)
 
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'html')
