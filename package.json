@@ -4,8 +4,8 @@
   "description": "A seed project for building api server using Express with MongoDB",
   "main": "index.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=production node index.js",
-    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "start": "cross-env NODE_ENV=production node bin/server.js",
+    "dev": "cross-env NODE_ENV=development nodemon bin/server.js",
     "test": "cross-env NODE_ENV=test nyc mocha --compilers js:babel-register test/**/*.test.js",
     "coverage": "nyc report --reporter=text-summary",
     "prebuild": "rimraf dist",
@@ -39,7 +39,9 @@
     "joi": "^10.2.2",
     "lodash": "^4.17.2",
     "method-override": "^2.3.7",
+    "minimist": "^1.2.0",
     "mongoose": "^4.7.2",
+    "mongoose-seed": "^0.3.1",
     "morgan": "^1.7.0",
     "nodemailer": "^3.1.4",
     "nodemailer-sendgrid-transport": "^0.2.0",
@@ -75,5 +77,8 @@
     "nyc": "^10.1.2",
     "rimraf": "^2.5.4",
     "supertest": "^2.0.1"
+  },
+  "bin": {
+    "shielder": "bin/server.js"
   }
 }
