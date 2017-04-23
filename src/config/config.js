@@ -11,9 +11,15 @@ export default {
     secret: 'ssBQv9iDLkBlmF9aL0EO5D0jK9Upr1Yc',
     resave: false,
     saveUninitialized: false,
-    cookie: {
-      maxAge: 14 * 24 * 60 * 60 * 1000  // 14 days
-    }
+    cookie: { maxAge: 14 * 24 * 60 * 60 * 1000 }  // 14 days
+  },
+
+  oauth2: {
+    tokenType: 'Bearer',
+    clientSecret: { length: 32 },
+    authorizationCode: { length: 32, expiresIn: 600 },
+    accessToken: { isJWT: true, length: 256, expiresIn: 3600 },  // If use JWT, the length will be ignored.
+    refreshToken: { length: 256 }
   },
 
   jwt: {
@@ -22,32 +28,8 @@ export default {
   },
 
   mailer: {
-    sender: {
-      name: 'Shielder',
-      address: 'no-reply@example.com'
-    },
-    sendgrid: {
-      key: ''
-    }
-  },
-
-  oauth2: {
-    tokenType: 'Bearer',
-    clientSecret: {
-      length: 32
-    },
-    authorizationCode: {
-      length: 32,
-      expiresIn: 600   // 10 minutes
-    },
-    accessToken: {
-      isJWT: true,
-      length: 256,     // if use JWT, it will be ignored
-      expiresIn: 3600  // 1 hour
-    },
-    refreshToken: {
-      length: 256
-    }
+    sender: { name: 'Shielder', address: 'no-reply@example.com' },
+    sendgrid: { key: '' }
   },
 
   proxyTable: {}

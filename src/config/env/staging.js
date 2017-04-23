@@ -1,6 +1,6 @@
 export default {
   mongoDB: {
-    uri: 'mongodb://localhost:27017/api-seed-staging',
+    uri: 'mongodb://localhost:27017/shields-staging',
     options: {
       server: { socketOptions: { keepAlive: 1 } }
     }
