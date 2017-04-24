@@ -9,16 +9,6 @@ const OAuthClientSchema = new mongoose.Schema({
   trusted: { type: Boolean, default: false }
 }, { collection: 'oauth_clients', timestamps: true })
 
-OAuthClientSchema.set('toJSON', {
-  transform: (doc, ret, options) => {
-    ret.id = ret._id
-    delete ret._id
-    delete ret.__v
-    delete ret.createdAt
-    delete ret.updatedAt
-  }
-})
-
 OAuthClientSchema.pre('save', function (next) {
   if (!this.isNew) return next()
   this.secret = uid(config.oauth2.clientSecret.length)
@@ -39,4 +29,6 @@ OAuthClientSchema.methods = {
 
 }
 
-export default mongoose.model('OAuthClient', OAuthClientSchema)
+const OAuthClient = mongoose.model('OAuthClient', OAuthClientSchema)
+
+export default OAuthClient
