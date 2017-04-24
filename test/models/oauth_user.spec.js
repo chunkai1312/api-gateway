@@ -1,13 +1,15 @@
 import connectMongoDB from '../../src/config/mongoose'
 import OAuthUser from '../../src/models/oauth_user'
+// import users from '../fixtures/oauth_client.json'
 
 connectMongoDB()
 
 describe('OAuthUser Model:', () => {
-  const testUser = { username: 'test', password: '123qwe', email: 'test@example.com' }
+  const testUser = { username: 'test', password: 'password', email: 'test@example.com' }
 
   beforeEach(async () => {
     await OAuthUser.remove()
+    // await OAuthUser.create(users)
   })
 
   afterEach(async () => {
@@ -88,7 +90,7 @@ describe('OAuthUser Model:', () => {
     describe('#authenticate()', () => {
       it('should return true if password is valid', async () => {
         const user = await new OAuthUser(testUser).save()
-        const isAuthenticated = await user.authenticate('123qwe')
+        const isAuthenticated = await user.authenticate('password')
         expect(isAuthenticated).toBe(true)
       })
 
@@ -102,13 +104,13 @@ describe('OAuthUser Model:', () => {
     describe('#changePassword()', () => {
       it('should return true', async () => {
         const user = await new OAuthUser(testUser).save()
-        const newPassword = await user.changePassword('123qwe', 'new')
+        const newPassword = await user.changePassword('password', 'new password')
         expect(newPassword).toBe(true)
       })
 
       it('should return false if old password is invalid', async () => {
         const user = await new OAuthUser(testUser).save()
-        const newPassword = await user.changePassword('error', 'new')
+        const newPassword = await user.changePassword('blah', 'new password')
         expect(newPassword).toBe(false)
       })
     })
