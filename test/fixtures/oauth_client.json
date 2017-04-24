@@ -1,0 +1,16 @@
+[
+  {
+    "clientId": "b596f769-d347-48d5-be35-1fc0f5552d45",
+    "clientSecret": "6e72c955ce60fbdcf133f1fa73812c7a",
+    "redirectURIs": ["https://www.example.com/callback"],
+    "name": "Test Client",
+    "trusted": false
+  },
+  {
+    "clientId": "3217b256-82a1-4e00-a06d-0ca8888582cc",
+    "clientSecret": "deb5bbb5543ad1c85e34bc2e03117b98",
+    "redirectURIs": ["https://www.example.com/callback"],
+    "name": "Trusted Client",
+    "trusted": true
+  }
+]

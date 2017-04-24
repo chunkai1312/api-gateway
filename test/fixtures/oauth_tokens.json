@@ -1,0 +1,14 @@
+[
+  {
+    "type": "AUTHORIZATION_CODE",
+    "jti": "dd8b1cf1-0fc2-4294-b6fb-24c2fe07286c"
+  },
+  {
+    "type": "ACCESS_TOKEN",
+    "jti": "316cc09e-ea84-477a-aa04-f46e61369041"
+  },
+  {
+    "type": "REFRESH_TOKEN",
+    "jti": "1044b768-d9cf-4913-b687-ae9f990ae260"
+  }
+]
