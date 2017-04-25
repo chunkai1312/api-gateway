@@ -15,9 +15,9 @@ export default {
   },
 
   oauth2: {
-    authorizationCode: { expiresIn: 300 }, // 5 minutes
-    accessToken: { expiresIn: 3600 },      // 1 hour
-    refreshToken: { expiresIn: 52560000 }  // 100 years
+    authorizationCode: { expiresIn: '5m' },
+    accessToken: { expiresIn: '1h' },
+    refreshToken: { expiresIn: '100y' }
   },
 
   jwt: {
