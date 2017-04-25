@@ -1,9 +1,10 @@
+import { randomBytes } from 'crypto'
 import mongoose from 'mongoose'
-import { uid } from 'rand-token'
-import config from '../config'
+import uuid from 'uuid/v4'
 
 const OAuthClientSchema = new mongoose.Schema({
-  secret: { type: String },
+  clientId: { type: String, unique: true },
+  clientSecret: { type: String },
   redirectURIs: [{ type: String }],
   name: { type: String },
   trusted: { type: Boolean, default: false }
@@ -11,7 +12,8 @@ const OAuthClientSchema = new mongoose.Schema({
 
 OAuthClientSchema.pre('save', function (next) {
   if (!this.isNew) return next()
-  this.secret = uid(config.oauth2.clientSecret.length)
+  this.clientId = uuid()
+  this.clientSecret = randomBytes(16).toString('hex')
   return next()
 })
 
