@@ -87,6 +87,33 @@ OAuthTokenSchema.statics = {
 
 }
 
+OAuthTokenSchema.methods = {
+
+  validateAuthorizationCode (token, client, redirectURI) {
+    verifyToken(token)
+    if (client.id !== this.payload.clientID) {
+      throw new Error('AuthCode clientID does not match client id given');
+    }
+    if (redirectURI !== this.payload.redirectURI) {
+      throw new Error('AuthCode redirectURI does not match redirectURI given');
+    }
+    return this
+  },
+
+  validateAccessToken (token) {
+    verifyToken(token)
+    return this
+  },
+
+  validateRefreshToken (token, client) {
+    verifyToken(token)
+    if (client.id !== this.payload.clientId) {
+      throw new Error('RefreshToken clientID does not match client id given')
+    }
+    return this
+  }
+}
+
 const OAuthToken = mongoose.model('OAuthToken', OAuthTokenSchema)
 
 export default OAuthToken
