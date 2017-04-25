@@ -1,15 +1,22 @@
+import mongoose from 'mongoose'
+import uuid from 'uuid/v4'
+import jwt from 'jsonwebtoken'
 import connectMongoDB from '../../src/config/mongoose'
-import OAuthToken, { types } from '../../src/models/oauth_token'
+import OAuthToken, { types, createToken, verifyToken } from '../../src/models/oauth_token'
 // import tokens from '../fixtures/oauth_tokens.json'
 
 connectMongoDB()
 
 describe('OAuthToken Model:', () => {
   const tokens = [
-    { type: 'AUTHORIZATION_CODE', jti: 'dd8b1cf1-0fc2-4294-b6fb-24c2fe07286c' },
-    { type: 'ACCESS_TOKEN', jti: '316cc09e-ea84-477a-aa04-f46e61369041' },
-    { type: 'REFRESH_TOKEN', jti: '1044b768-d9cf-4913-b687-ae9f990ae260' }
+    { tokenId: 'dd8b1cf1-0fc2-4294-b6fb-24c2fe07286c', type: 'AUTHORIZATION_CODE' },
+    { tokenId: '316cc09e-ea84-477a-aa04-f46e61369041', type: 'ACCESS_TOKEN' },
+    { tokenId: '1044b768-d9cf-4913-b687-ae9f990ae260', type: 'REFRESH_TOKEN' }
   ]
+
+  let authorizationCode
+  let accessToken
+  let refreshToken
 
   beforeAll(async () => {
     await OAuthToken.remove()
@@ -21,47 +28,101 @@ describe('OAuthToken Model:', () => {
   })
 
   describe('OAuthClientSchema.statics', () => {
-    describe('#isExist()', () => {
-      it('should throw error if the token type is invalid', async () => {
-        let value, error
-        try {
-          value = await OAuthToken.isExist('unknown', 'blah')
-        } catch (err) {
-          error = err
-        } finally {
-          expect(value).toBeUndefined()
-          expect(error).toBeDefined()
+    describe('#saveToken()', () => {
+      it('should save token of AUTHORIZATION_CODE type', async () => {
+        const payload = {
+          user: new mongoose.Types.ObjectId(),
+          clientId: uuid(),
+          redirectURI: 'https://example.com/callback',
+          scope: 'offline_access'
         }
+        authorizationCode = createToken({ sub: payload.user, exp: 300 })
+        const token = await OAuthToken.saveToken(authorizationCode, types.AUTHORIZATION_CODE, payload)
+        expect(token).toBeDefined()
+        expect(token.tokenId).toBe(jwt.decode(authorizationCode).jti)
+        expect(token.type).toBe(types.AUTHORIZATION_CODE)
+        expect(token.payload.toJSON()).toEqual(payload)
+        expect(token.payload.toObject()).toEqual(payload)
       })
 
-      it('should be true if the token of authorization code is exist', async () => {
-        const isExist = await OAuthToken.isExist(types.AUTHORIZATION_CODE, 'dd8b1cf1-0fc2-4294-b6fb-24c2fe07286c')
-        expect(isExist).toBe(true)
+      it('should save token of ACCESS_TOKEN type', async () => {
+        const payload = {
+          user: new mongoose.Types.ObjectId(),
+          clientId: uuid(),
+          scope: 'offline_access',
+          expiresAt: new Date(Date.now() + (3600 * 1000))
+        }
+        accessToken = createToken({ sub: payload.user, exp: 3600 })
+        const token = await OAuthToken.saveToken(accessToken, types.ACCESS_TOKEN, payload)
+        expect(token).toBeDefined()
+        expect(token.tokenId).toBe(jwt.decode(accessToken).jti)
+        expect(token.type).toBe(types.ACCESS_TOKEN)
+        expect(token.payload.toJSON()).toEqual(payload)
+        expect(token.payload.toObject()).toEqual(payload)
       })
 
-      it('should be false if the token of authorization code is not exist', async () => {
-        const isExist = await OAuthToken.isExist(types.AUTHORIZATION_CODE, 'blah')
-        expect(isExist).toBe(false)
+      it('should save token of REFRESH_TOKEN type', async () => {
+        const payload = {
+          user: new mongoose.Types.ObjectId(),
+          clientId: uuid(),
+          scope: 'offline_access'
+        }
+        refreshToken = createToken({ sub: payload.user, exp: 3600 })
+        const token = await OAuthToken.saveToken(refreshToken, types.REFRESH_TOKEN, payload)
+        expect(token).toBeDefined()
+        expect(token.tokenId).toBe(jwt.decode(refreshToken).jti)
+        expect(token.type).toBe(types.REFRESH_TOKEN)
+        expect(token.payload.toJSON()).toEqual(payload)
+        expect(token.payload.toObject()).toEqual(payload)
+      })
+    })
+
+    describe('#findToken()', () => {
+      it('should find authorizationCode', async () => {
+        const token = await OAuthToken.findToken(authorizationCode)
+        expect(token).toBeDefined()
+        expect(token.tokenId).toBe(jwt.decode(authorizationCode).jti)
       })
 
-      it('should be true if the token of access toke is exist', async () => {
-        const isExist = await OAuthToken.isExist(types.ACCESS_TOKEN, '316cc09e-ea84-477a-aa04-f46e61369041')
-        expect(isExist).toBe(true)
+      it('should find accessToken', async () => {
+        const token = await OAuthToken.findToken(accessToken)
+        expect(token).toBeDefined()
+        expect(token.tokenId).toBe(jwt.decode(accessToken).jti)
       })
 
-      it('should be false if the token of access toke is not exist', async () => {
-        const isExist = await OAuthToken.isExist(types.ACCESS_TOKEN, 'blah')
-        expect(isExist).toBe(false)
+      it('should find refreshToken', async () => {
+        const token = await OAuthToken.findToken(refreshToken)
+        expect(token).toBeDefined()
+        expect(token.tokenId).toBe(jwt.decode(refreshToken).jti)
+      })
+    })
+
+    describe('#removeToken()', () => {
+      it('should remove authorizationCode', async () => {
+        const removedToken = await OAuthToken.removeToken(authorizationCode)
+        expect(removedToken).toBeDefined()
+        expect(removedToken.tokenId).toBe(jwt.decode(authorizationCode).jti)
+
+        const token = await OAuthToken.findToken(authorizationCode)
+        expect(token).toBe(null)
       })
 
-      it('should be true if the token of refresh token is exist', async () => {
-        const isExist = await OAuthToken.isExist(types.REFRESH_TOKEN, '1044b768-d9cf-4913-b687-ae9f990ae260')
-        expect(isExist).toBe(true)
+      it('should remove accessToken', async () => {
+        const removedToken = await OAuthToken.removeToken(accessToken)
+        expect(removedToken).toBeDefined()
+        expect(removedToken.tokenId).toBe(jwt.decode(accessToken).jti)
+
+        const token = await OAuthToken.findToken(accessToken)
+        expect(token).toBe(null)
       })
 
-      it('should be false if the token of refresh token is not exist', async () => {
-        const isExist = await OAuthToken.isExist(types.REFRESH_TOKEN, 'blah')
-        expect(isExist).toBe(false)
+      it('should remove refreshToken', async () => {
+        const removedToken = await OAuthToken.removeToken(refreshToken)
+        expect(removedToken).toBeDefined()
+        expect(removedToken.tokenId).toBe(jwt.decode(refreshToken).jti)
+
+        const token = await OAuthToken.findToken(refreshToken)
+        expect(token).toBe(null)
       })
     })
   })
