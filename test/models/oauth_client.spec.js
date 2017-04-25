@@ -31,6 +31,15 @@ describe('OAuthClient Model:', () => {
         expect(client.trusted).toBe(false)
       })
     })
+
+    describe('#findByClientId()', () => {
+      it('should return an OAuthUser that is equal to get', async () => {
+        const savedClient = await OAuthClient.create(testClient)
+        const client = await OAuthClient.findByClientId(savedClient.clientId)
+        expect(client).toBeDefined()
+        expect(client.clientId).toBe(savedClient.clientId)
+      })
+    })
   })
 
   describe('OAuthClientSchema.methods', () => {
