@@ -17,6 +17,20 @@ OAuthClientSchema.pre('save', function (next) {
   return next()
 })
 
+OAuthClientSchema.statics = {
+
+  /**
+   * Find an OAuthClient by client id.
+   *
+   * @param  {string}   clientId - The client id for querying.
+   * @return {Promise}  Result of query.
+   */
+  findByClientId (clientId) {
+    return this.findOne({ clientId })
+  }
+
+}
+
 OAuthClientSchema.methods = {
 
   /**
