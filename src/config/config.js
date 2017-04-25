@@ -15,11 +15,9 @@ export default {
   },
 
   oauth2: {
-    tokenType: 'Bearer',
-    clientSecret: { length: 32 },
-    authorizationCode: { length: 32, expiresIn: 600 },
-    accessToken: { isJWT: true, length: 256, expiresIn: 3600 },  // If use JWT, the length will be ignored.
-    refreshToken: { length: 256 }
+    authorizationCode: { expiresIn: 300 }, // 5 minutes
+    accessToken: { expiresIn: 3600 },      // 1 hour
+    refreshToken: { expiresIn: 52560000 }  // 100 years
   },
 
   jwt: {
