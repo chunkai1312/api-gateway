@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import oauth2 from '../config/oauth2orize'
 import { auth } from '../middlewares'
-import { oauthUser, oauthClient, main } from '../controllers'
+import { user, client, token, main } from '../controllers'
 
 const router = Router()
 
@@ -9,17 +9,20 @@ const router = Router()
   .post('/oauth2/authorize', oauth2.decision)
   .post('/oauth2/token', oauth2.token)
 
-  .get('/users', auth.isTrustedClient(), oauthUser.index)
-  .post('/users', auth.isTrustedClient(), oauthUser.create)
-  .get('/users/:id', auth.isTrustedClient(), oauthUser.show)
-  .put('/users/:id', auth.isTrustedClient(), oauthUser.update)
-  .delete('/users/:id', auth.isTrustedClient(), oauthUser.destroy)
+  .get('/token/info', token.info)
+  .get('/token/revoke', token.revoke)
 
-  .get('/clients', auth.isTrustedClient(), oauthClient.index)
-  .post('/clients', auth.isTrustedClient(), oauthClient.create)
-  .get('/clients/:id', auth.isTrustedClient(), oauthClient.show)
-  .put('/clients/:id', auth.isTrustedClient(), oauthClient.update)
-  .delete('/clients/:id', auth.isTrustedClient(), oauthClient.destroy)
+  .get('/users', auth.isTrustedClient(), user.index)
+  .post('/users', auth.isTrustedClient(), user.create)
+  .get('/users/:id', auth.isTrustedClient(), user.show)
+  .put('/users/:id', auth.isTrustedClient(), user.update)
+  .delete('/users/:id', auth.isTrustedClient(), user.destroy)
+
+  .get('/clients', auth.isTrustedClient(), client.index)
+  .post('/clients', auth.isTrustedClient(), client.create)
+  .get('/clients/:id', auth.isTrustedClient(), client.show)
+  .put('/clients/:id', auth.isTrustedClient(), client.update)
+  .delete('/clients/:id', auth.isTrustedClient(), client.destroy)
 
   .get('/', main.index)
   .get('/signup', main.showSignup)
