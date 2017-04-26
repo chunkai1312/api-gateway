@@ -96,33 +96,33 @@ describe('OAuthToken Model:', () => {
       })
     })
 
-    // describe('#removeToken()', () => {
-    //   it('should remove authorizationCode', async () => {
-    //     const removedToken = await OAuthToken.removeToken(authorizationCode)
-    //     expect(removedToken).toBeDefined()
-    //     expect(removedToken.jwtId).toBe(jwt.decode(authorizationCode).jti)
+    describe('#removeToken()', () => {
+      it('should remove authorizationCode', async () => {
+        const removedToken = await OAuthToken.removeToken(authorizationCode)
+        expect(removedToken).toBeDefined()
+        expect(removedToken.jwtId).toBe(jwt.decode(authorizationCode).jti)
 
-    //     const token = await OAuthToken.findToken(authorizationCode)
-    //     expect(token).toBe(null)
-    //   })
+        const token = await OAuthToken.findToken(authorizationCode)
+        expect(token).toBe(null)
+      })
 
-    //   it('should remove accessToken', async () => {
-    //     const removedToken = await OAuthToken.removeToken(accessToken)
-    //     expect(removedToken).toBeDefined()
-    //     expect(removedToken.jwtId).toBe(jwt.decode(accessToken).jti)
+      it('should remove accessToken', async () => {
+        const removedToken = await OAuthToken.removeToken(accessToken)
+        expect(removedToken).toBeDefined()
+        expect(removedToken.jwtId).toBe(jwt.decode(accessToken).jti)
 
-    //     const token = await OAuthToken.findToken(accessToken)
-    //     expect(token).toBe(null)
-    //   })
+        const token = await OAuthToken.findToken(accessToken)
+        expect(token).toBe(null)
+      })
 
-    //   it('should remove refreshToken', async () => {
-    //     const removedToken = await OAuthToken.removeToken(refreshToken)
-    //     expect(removedToken).toBeDefined()
-    //     expect(removedToken.jwtId).toBe(jwt.decode(refreshToken).jti)
+      it('should remove refreshToken', async () => {
+        const removedToken = await OAuthToken.removeToken(refreshToken)
+        expect(removedToken).toBeDefined()
+        expect(removedToken.jwtId).toBe(jwt.decode(refreshToken).jti)
 
-    //     const token = await OAuthToken.findToken(refreshToken)
-    //     expect(token).toBe(null)
-      // })
-    // })
+        const token = await OAuthToken.findToken(refreshToken)
+        expect(token).toBe(null)
+      })
+    })
   })
 })
