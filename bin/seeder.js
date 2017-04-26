@@ -2,7 +2,6 @@
 
 var path = require('path')
 var seeder = require('mongoose-seed')
-var uid = require('rand-token').uid
 var env = process.env.NODE_ENV || 'development'
 var config = (env === 'development') ? require('babel-register') && require('../src/config') : require('../dist/config')
 var modelsPath = (env === 'development') ? path.join(config.root, 'src/models') : path.join(config.root, 'dist/models')
@@ -13,7 +12,6 @@ var data = [
     documents: [
       {
         'name': 'test client',
-        'secret': uid(32),
         'redirectURIs': ['http://localhost/callback']
       }
     ]
@@ -25,8 +23,10 @@ var data = [
         'username': 'test',
         'password': '123qwe',
         'email': 'test@example.com',
-        'firstName': 'Test',
-        'lastName': 'Client'
+        'profile': {
+          'firstName': 'Test',
+          'lastName': 'Client'
+        }
       }
     ]
   }
