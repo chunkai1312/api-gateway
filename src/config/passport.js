@@ -14,7 +14,7 @@ import { OAuthUser, OAuthClient, OAuthToken } from '../models'
  */
 const local = new LocalStrategy(async (usernameOrEmail, password, done) => {
   try {
-    const user = await OAuthUser.getByUsernameOrEmail(usernameOrEmail)
+    const user = await OAuthUser.findByUsernameOrEmail(usernameOrEmail)
     if (!user) return done(null, false)
     const isAuthenticated = await user.authenticate(password)
     if (!isAuthenticated) return done(null, false)
@@ -37,9 +37,9 @@ const local = new LocalStrategy(async (usernameOrEmail, password, done) => {
  */
 const basic = new BasicStrategy(async (username, password, done) => {
   try {
-    const client = await OAuthClient.findById(username)
+    const client = await OAuthClient.findByClientId(username)
     if (!client) return done(null, false)
-    if (client.secret !== password) return done(null, false)
+    if (client.clientSecret !== password) return done(null, false)
     done(null, client)
   } catch (err) {
     done(err)
@@ -56,9 +56,9 @@ const basic = new BasicStrategy(async (username, password, done) => {
 
 const oauth2ClientPassword = new ClientPasswordStrategy(async (clientId, clientSecret, done) => {
   try {
-    const client = await OAuthClient.findById(clientId)
+    const client = await OAuthClient.findByClientId(clientId)
     if (!client) return done(null, false)
-    if (client.secret !== clientSecret) return done(null, false)
+    if (client.clientSecret !== clientSecret) return done(null, false)
     return done(null, client)
   } catch (err) {
     done(err)
@@ -78,7 +78,7 @@ const oauth2ClientPassword = new ClientPasswordStrategy(async (clientId, clientS
  */
 const bearer = new BearerStrategy(async (accessToken, done) => {
   try {
-    const token = await OAuthToken.getByAccessToken(accessToken)
+    const token = await OAuthToken.findByAccessToken(accessToken)
     if (!token) return done(null, false)
 
     if (!token.isValid()) {
