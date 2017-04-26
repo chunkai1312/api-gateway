@@ -34,13 +34,13 @@ export async function doSignup (req, res) {
     return res.redirect('/signup')
   }
 
-  const userByUsername = await OAuthUser.getByUsername(req.body.username)
+  const userByUsername = await OAuthUser.findByUsername(req.body.username)
   if (userByUsername) {
     req.flash('message', 'Username already exists')
     return res.redirect('/signup')
   }
 
-  const userByEmail = await OAuthUser.getByEmail(req.body.email)
+  const userByEmail = await OAuthUser.findByEmail(req.body.email)
   if (userByEmail) {
     req.flash('message', 'Email already in use')
     return res.redirect('/signup')
@@ -93,7 +93,7 @@ export async function doForgot (req, res) {
     return res.redirect('/forgot')
   }
 
-  const user = await OAuthUser.getByEmail(req.body.email)
+  const user = await OAuthUser.findByEmail(req.body.email)
   if (!user) {
     req.flash('message', 'Can\'t find that email, sorry.')
     return res.redirect('/forgot')
@@ -111,7 +111,7 @@ export async function doForgot (req, res) {
 export async function showReset (req, res) {
   if (req.isAuthenticated()) res.redirect('/')
 
-  const user = await OAuthUser.getByPasswordResetToken(req.params.token)
+  const user = await OAuthUser.findByPasswordResetToken(req.params.token)
   if (!user) return res.redirect('/reset')
 
   res.render('reset', {
@@ -133,7 +133,7 @@ export async function doReset (req, res) {
     return res.redirect(`/reset/${req.params.token}`)
   }
 
-  const user = await OAuthUser.getByPasswordResetToken(req.params.token)
+  const user = await OAuthUser.findByPasswordResetToken(req.params.token)
   if (!user) return res.redirect(`/reset/${req.params.token}`)
 
   await user.resetPassword(req.body.password)
