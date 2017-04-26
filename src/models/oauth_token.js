@@ -91,11 +91,11 @@ OAuthTokenSchema.methods = {
 
   validateAuthorizationCode (token, client, redirectURI) {
     verifyToken(token)
-    if (client.id !== this.payload.clientID) {
-      throw new Error('AuthCode clientID does not match client id given');
+    if (client.clientId !== this.payload.clientId) {
+      throw new Error('AuthCode clientID does not match client id given')
     }
     if (redirectURI !== this.payload.redirectURI) {
-      throw new Error('AuthCode redirectURI does not match redirectURI given');
+      throw new Error('AuthCode redirectURI does not match redirectURI given')
     }
     return this
   },
@@ -107,7 +107,7 @@ OAuthTokenSchema.methods = {
 
   validateRefreshToken (token, client) {
     verifyToken(token)
-    if (client.id !== this.payload.clientId) {
+    if (client.clientId !== this.payload.clientId) {
       throw new Error('RefreshToken clientID does not match client id given')
     }
     return this
