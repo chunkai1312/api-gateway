@@ -12,9 +12,9 @@ export async function index (req, res) {
 
 export async function create (req, res) {
   let user
-  user = await OAuthUser.getByUsername(req.body.username)
+  user = await OAuthUser.findByUsername(req.body.username)
   if (user) throw error(406)
-  user = await OAuthUser.getByEmail(req.body.email)
+  user = await OAuthUser.findByEmail(req.body.email)
   if (user) throw error(406)
   user = await OAuthUser.create(Object.assign(req.body, { provider: req.authInfo.client }))
   res.status(201).json(user)
@@ -52,10 +52,10 @@ export async function changePassword (req, res) {
 }
 
 // export async function invite (req, res) {
-//   const user = await OAuthUser.getByEmail(req.body.email)
+//   const user = await OAuthUser.findByEmail(req.body.email)
 //   if (user) return res.json(user)
 
-//   let invitation = await Invitation.getByEmail(req.body.email)
+//   let invitation = await Invitation.findByEmail(req.body.email)
 //   if (!invitation) invitation = new Invitation()
 //   invitation.name = req.body.name
 //   invitation.email = req.body.email
