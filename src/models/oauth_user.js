@@ -1,5 +1,7 @@
+import { randomBytes } from 'crypto'
 import mongoose from 'mongoose'
 import credential from 'credential'
+import jwt from 'jsonwebtoken'
 
 const pw = credential()
 
@@ -15,7 +17,7 @@ const OAuthUserSchema = new mongoose.Schema({
   },
   passwordReset: {
     token: { type: String },
-    expires: { type: Date }
+    expiresAt: { type: Date }
   }
 }, { collection: 'oauth_users', timestamps: true })
 
@@ -73,7 +75,24 @@ OAuthUserSchema.statics = {
       { username: usernameOrEmail },
       { email: usernameOrEmail }
     ]})
+  },
+
+  /**
+   * Find an OAuthUser by password reset token.
+   *
+   * @param  {string}   token - The JWT Token.
+   * @return {Promise}  Result of query.
+   */
+  findByPasswordResetToken (token) {
+    const { sub, jti, exp } = jwt.decode(token) || {}
+
+    return this.findOne({
+      _id: sub,
+      'passwordReset.token': jti,
+      'passwordReset.expiresAt': exp * 1000
+    }).where('passwordReset.expiresAt').gt(Date.now())
   }
+
 }
 
 OAuthUserSchema.methods = {
@@ -109,7 +128,33 @@ OAuthUserSchema.methods = {
         })
         .catch(() => reject(false))
     })
+  },
+
+  /**
+   * Save password reset token.
+   *
+   * @param {String} token - The JWT Token.
+   * @return {Promise}  Returns the user instance if saved token successfully,
+   */
+  savePasswordResetToken (token) {
+    const { jti, exp } = jwt.decode(token)
+    this.passwordReset.token = jti
+    this.passwordReset.expiresAt = exp * 1000
+    return this.save()
+  },
+
+  /**
+   * Reset password of the user.
+   *
+   * @param {string}   newPassword - New password of the user.
+   * @return {Promise} Returns the new password if without error.
+   */
+  resetPassword (newPassword) {
+    this.password = newPassword
+    this.passwordResetExpires = Date.now()
+    return this.save()
   }
+
 }
 
 const User = mongoose.model('OAuthUser', OAuthUserSchema)
