@@ -1,13 +1,15 @@
 import passport from 'passport'
 import Joi from 'joi'
 import error from 'http-errors'
-import { OAuthUser } from '../models'
+import OAuthUser from '../models/oauth_user'
+import { createToken } from '../models/oauth_token'
 import { mailer } from '../services'
 
 export default {
 
   index: async (req, res) => {
     res.json(req.user)
+    // res.render('index', { title: 'Express', foo: { bar: 'baz' } })
   },
 
   showSignup: async (req, res) => {
@@ -101,8 +103,10 @@ export default {
       return res.redirect('/forgot')
     }
 
-    await user.generatePasswordResetToken()
-    const result = await mailer.sendPasswordReset(user.email, user.name, user.passwordResetToken)
+    const token = createToken({ subject: user.id, expiresIn: 3600 })
+    await user.savePasswordResetToken(token)
+
+    const result = await mailer.sendPasswordReset(user.email, user.name, token)
     if (result.message !== 'success') throw error(500)
 
     req.flash('message', 'Check your email for a link to reset your password. If it doesn\'t appear within a few minutes, check your spam folder.')
