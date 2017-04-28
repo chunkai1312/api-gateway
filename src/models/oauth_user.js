@@ -1,4 +1,3 @@
-import { randomBytes } from 'crypto'
 import mongoose from 'mongoose'
 import credential from 'credential'
 import jwt from 'jsonwebtoken'
@@ -151,7 +150,7 @@ OAuthUserSchema.methods = {
    */
   resetPassword (newPassword) {
     this.password = newPassword
-    this.passwordResetExpires = Date.now()
+    this.passwordReset.expiresAt = Date.now()
     return this.save()
   }
 
