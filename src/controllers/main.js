@@ -15,11 +15,7 @@ export default {
   showSignup: async (req, res) => {
     if (req.isAuthenticated()) return res.redirect('/')
 
-    res.render('signup', {
-      errors: req.flash('errors'),
-      message: req.flash('message'),
-      success: req.flash('success')
-    })
+    res.render(req.route.path)
   },
 
   doSignup: async (req, res) => {
@@ -58,7 +54,8 @@ export default {
   showLogin: async (req, res) => {
     if (req.isAuthenticated()) return res.redirect('/')
 
-    res.render('login', {
+    res.render(req.url, {
+      login: 'login page',
       error: req.flash('error')
     })
   },
@@ -79,11 +76,7 @@ export default {
   showForgot: async (req, res) => {
     if (req.isAuthenticated()) res.redirect('/')
 
-    res.render('forgot', {
-      errors: req.flash('errors'),
-      message: req.flash('message'),
-      success: req.flash('success')
-    })
+    res.render(req.route.path)
   },
 
   doForgot: async (req, res) => {
@@ -94,13 +87,13 @@ export default {
     const validation = Joi.validate(req.body, schema)
     if (validation.error) {
       req.flash('errors', validation.error.details)
-      return res.redirect('/forgot')
+      return res.redirect('/password/forgot')
     }
 
     const user = await OAuthUser.findByEmail(req.body.email)
     if (!user) {
-      req.flash('message', 'Can\'t find that email, sorry.')
-      return res.redirect('/forgot')
+      req.flash('info', 'Can\'t find that email, sorry.')
+      return res.redirect('/password/forgot')
     }
 
     const token = createToken({ subject: user.id, expiresIn: 3600 })
@@ -109,22 +102,18 @@ export default {
     const result = await mailer.sendPasswordReset(user.email, user.name, token)
     if (result.message !== 'success') throw error(500)
 
-    req.flash('message', 'Check your email for a link to reset your password. If it doesn\'t appear within a few minutes, check your spam folder.')
-    req.flash('success', true)
-    res.redirect('/forgot')
+    req.flash('success', { msg: 'Check your email for a link to reset your password. If it doesn\'t appear within a few minutes, check your spam folder.' })
+    res.redirect('/password/forgot')
   },
 
   showReset: async (req, res) => {
     if (req.isAuthenticated()) res.redirect('/')
 
     const user = await OAuthUser.findByPasswordResetToken(req.params.token)
-    if (!user) return res.redirect('/reset')
 
-    res.render('reset', {
-      errors: req.flash('errors'),
-      message: req.flash('message'),
-      success: req.flash('success')
-    })
+    if (!user) return res.redirect('/')
+
+    res.render(req.route.path, { username: user.username })
   },
 
   doReset: async (req, res) => {
@@ -136,16 +125,15 @@ export default {
     const validation = Joi.validate(req.body, schema)
     if (validation.error) {
       req.flash('errors', validation.error.details)
-      return res.redirect(`/reset/${req.params.token}`)
+      return res.redirect(`/password/reset/${req.params.token}`)
     }
 
     const user = await OAuthUser.findByPasswordResetToken(req.params.token)
-    if (!user) return res.redirect(`/reset/${req.params.token}`)
+    if (!user) return res.redirect(`/password/reset/${req.params.token}`)
 
     await user.resetPassword(req.body.password)
-    // req.flash('message', 'Your password has been successfully reset.')
-    // req.flash('success', true)
-    res.redirect('/login')
+    req.flash('success', { msg: 'Your password has been successfully reset.' })
+    res.redirect(req.url)
   },
 
   notFound: async (req, res) => {
