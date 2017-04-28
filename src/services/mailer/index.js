@@ -57,7 +57,7 @@ export default {
   sendPasswordReset (to, name, passwordResetToken) {
     const template = fs.readFileSync(path.join(templateDir, 'password_reset.html'), 'utf-8')
     const compiled = _.template(template)
-    const html = compiled({ name, url: `${config.baseUrl}/reset/${passwordResetToken}` })
+    const html = compiled({ name, url: `${config.baseUrl}/password/reset/${passwordResetToken}` })
     const options = { to, html }
     options.subject = 'Reset your password'
     return this.send(options)
