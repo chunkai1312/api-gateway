@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import oauth2 from '../config/oauth2orize'
 import { auth } from '../middlewares'
-import { user, client, token, main } from '../controllers'
+import { account, user, client, token } from '../controllers'
 
 const router = Router()
 
@@ -23,16 +23,16 @@ const router = Router()
   .put('/oauth2/clients/:id', auth.isTrustedClient(), client.update)
   .delete('/oauth2/clients/:id', auth.isTrustedClient(), client.destroy)
 
-  .get('/', main.index)
-  .get('/signup', main.showSignup)
-  .post('/signup', main.doSignup)
-  .get('/login', main.showLogin)
-  .post('/login', main.doLogin)
-  .get('/logout', main.doLogout)
-  .get('/password/forgot', main.showForgot)
-  .post('/password/forgot', main.doForgot)
-  .get('/password/reset/:token', main.showReset)
-  .post('/password/reset/:token', main.doReset)
-  // .get('/*', main.notFound)
+  .get('/', account.index)
+  .get('/signup', account.showSignup)
+  .post('/signup', account.doSignup)
+  .get('/login', account.showLogin)
+  .post('/login', account.doLogin)
+  .get('/logout', account.doLogout)
+  .get('/password/forgot', account.showForgot)
+  .post('/password/forgot', account.doForgot)
+  .get('/password/reset/:token', account.showReset)
+  .post('/password/reset/:token', account.doReset)
+  .get('/*', (req, res) => res.render(req.url))
 
 export default () => router
