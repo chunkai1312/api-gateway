@@ -6,15 +6,8 @@ import routes from './routes'
 import connectMongoDB from './config/mongoose'
 import setupPassport from './config/passport'
 
-connectMongoDB()
-setupPassport()
-
 global.navigator = global.navigator || {}
 global.navigator.userAgent = global.navigator.userAgent || 'all'
-
-const app = express()
-
-httpProxy(app)
 
 const engine = ReactEngine.server.create({
   routes: require('./views/routes'),
@@ -22,11 +15,18 @@ const engine = ReactEngine.server.create({
   performanceCollector: (stats) => console.log(stats)
 })
 
+connectMongoDB()
+setupPassport()
+
+const app = express()
+
+httpProxy(app)
+
 app.engine('js', engine)
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'js')
 app.set('view', ReactEngine.expressView)
-app.use(express.static(path.resolve(__dirname, '../static')))
+app.use(express.static(path.resolve(__dirname, '../public')))
 
 app.use(middlewares())
 app.use(routes())
