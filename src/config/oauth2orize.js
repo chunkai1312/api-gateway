@@ -4,7 +4,7 @@ import passport from 'passport'
 import login from 'connect-ensure-login'
 import { OAuthUser, OAuthClient } from '../models/'
 import OAuthToken, { types, createToken } from '../models/oauth_token'
-import { oauth2 } from '../config'
+import { oauth2, baseUrl } from '../config'
 
 // create OAuth 2.0 server
 const server = oauth2orize.createServer()
@@ -161,7 +161,7 @@ server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, 
  * first, and rendering the `dialog` view.
  */
 const authorization = [
-  login.ensureLoggedIn(),
+  login.ensureLoggedIn(`/login?continue=${baseUrl}/oauth2/authorize`),
   server.authorization((clientId, redirectURI, scope, done) => {
     OAuthClient.findByClientId(clientId)
       .then(client => {
@@ -178,7 +178,10 @@ const authorization = [
             callback(null, { allow: true })
           })(req, res, next)
         } else {
-          res.render('authorize', {
+          console.log('user', req.user)
+          console.log('client', req.oauth2.client)
+          console.log('req.oauth2', req.oauth2)
+          res.render(req.url, {
             transactionID: req.oauth2.transactionID,
             user: req.user,
             client: req.oauth2.client,
@@ -200,7 +203,7 @@ const authorization = [
  * a response.
  */
 const decision = [
-  login.ensureLoggedIn(),
+  login.ensureLoggedIn(`/login?continue=${baseUrl}/oauth2/decision`),
   server.decision((req, done) => done(null, { scope: req.oauth2.req.scope }))
 ]
 
