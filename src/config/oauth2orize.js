@@ -178,9 +178,6 @@ const authorization = [
             callback(null, { allow: true })
           })(req, res, next)
         } else {
-          console.log('user', req.user)
-          console.log('client', req.oauth2.client)
-          console.log('req.oauth2', req.oauth2)
           res.render(req.url, {
             transactionID: req.oauth2.transactionID,
             user: req.user,
