@@ -1,4 +1,5 @@
 import error from 'http-errors'
+import { Types } from 'mongoose'
 import { OAuthClient } from '../models'
 
 export default {
@@ -14,21 +15,24 @@ export default {
   },
 
   show: async (req, res) => {
+    if (!Types.ObjectId.isValid(req.params.id)) throw error(404)
     const client = await OAuthClient.findById(req.params.id)
     if (!client) throw error(404)
     res.status(200).json(client)
   },
 
   update: async (req, res) => {
+    if (!Types.ObjectId.isValid(req.params.id)) throw error(404)
     const client = await OAuthClient.findByIdAndUpdate(req.params.id, req.body, { new: true })
     if (!client) throw error(404)
     res.status(200).json(client)
   },
 
   destroy: async (req, res) => {
+    if (!Types.ObjectId.isValid(req.params.id)) throw error(404)
     const client = await OAuthClient.findByIdAndRemove(req.params.id)
     if (!client) throw error(404)
-    res.status(204).end()
+    res.status(200).json({ id: client.id, deleted: true })
   }
 
 }
