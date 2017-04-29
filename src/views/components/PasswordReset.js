@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react'
+import React, { PropTypes } from 'react'
 import TextField from 'material-ui/TextField'
 import RaisedButton from 'material-ui/RaisedButton'
 
@@ -18,7 +18,6 @@ const styles = {
     margin: '1em 0'
   }
 }
-
 
 const PasswordReset = ({ router, username, messages }) => {
   return (
@@ -60,6 +59,3 @@ PasswordReset.propTypes = {
 }
 
 export default PasswordReset
-
-
-// Password must contain one lowercase letter, one number, and be at least 7 characters long.

@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react'
+import React, { PropTypes } from 'react'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import { teal100, teal500, teal700 } from 'material-ui/styles/colors'
@@ -25,7 +25,8 @@ const styles = {
   },
   ribbon: {
     height: '40vh',
-    backgroundColor: teal700
+    backgroundColor: teal700,
+    backgroundSize: 'cover'
   },
   main: {
     display: 'flex',
@@ -51,26 +52,24 @@ const styles = {
   }
 }
 
-class Layout extends Component {
-  static propTypes = {
-    children: PropTypes.node
-  }
-
-  render () {
-    return (
-      <MuiThemeProvider muiTheme={muiTheme}>
-        <div style={styles.container}>
-          <AppBar title="Punwave" iconElementLeft={<img src="/img/icon.png" alt="Icon" style={styles.icon} />} iconStyleLeft={styles.iconStyleLeft} />
-          <div style={styles.ribbon} />
-          <div style={styles.main}>
-            <Paper className="paper" zDepth={2} style={styles.paper}>
-              {this.props.children}
-            </Paper>
-          </div>
+const Layout = ({ children }) => {
+  return (
+    <MuiThemeProvider muiTheme={muiTheme}>
+      <div style={styles.container}>
+        <AppBar title="Punwave" iconElementLeft={<img src="/img/icon.png" alt="Icon" style={styles.icon} />} iconStyleLeft={styles.iconStyleLeft} />
+        <div style={styles.ribbon} />
+        <div style={styles.main}>
+          <Paper className="paper" zDepth={2} style={styles.paper}>
+            {children}
+          </Paper>
         </div>
-      </MuiThemeProvider>
-    )
-  }
+      </div>
+    </MuiThemeProvider>
+  )
+}
+
+Layout.propTypes = {
+  children: PropTypes.node
 }
 
 export default Layout
