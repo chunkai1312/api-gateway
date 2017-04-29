@@ -64,7 +64,6 @@
     "react": "15.4",
     "react-dom": "15.4",
     "react-engine": "^4.3.0",
-    "react-hot-loader": "next",
     "react-router": "3",
     "react-tap-event-plugin": "^2.0.1",
     "uuid": "^3.0.1",
