@@ -47,6 +47,9 @@ const OAuthTokenSchema = new mongoose.Schema({
   expiresAt: { type: Date, expires: 0 }
 }, { collection: 'oauth_tokens', timestamps: true })
 
+OAuthTokenSchema.set('toJSON', { getters: true, virtuals: true })
+OAuthTokenSchema.set('toObject', { getters: true, virtuals: true })
+
 OAuthTokenSchema.statics = {
 
   /**
