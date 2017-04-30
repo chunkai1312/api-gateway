@@ -3,7 +3,8 @@ import { Strategy as LocalStrategy } from 'passport-local'
 import { BasicStrategy } from 'passport-http'
 import { Strategy as ClientPasswordStrategy } from 'passport-oauth2-client-password'
 import { Strategy as BearerStrategy } from 'passport-http-bearer'
-import { OAuthUser, OAuthClient, OAuthToken } from '../models'
+import { OAuthUser, OAuthClient } from '../models'
+import OAuthToken, { verifyToken } from '../models/oauth_token'
 
 /**
  * LocalStrategy
@@ -78,24 +79,18 @@ const oauth2ClientPassword = new ClientPasswordStrategy(async (clientId, clientS
  */
 const bearer = new BearerStrategy(async (accessToken, done) => {
   try {
-    const token = await OAuthToken.findByAccessToken(accessToken)
-    if (!token) return done(null, false)
+    verifyToken(accessToken)
 
-    if (!token.isValid()) {
-      await token.remove()
-      return done(null, false)
-    }
+    const token = await OAuthToken.findToken(accessToken)
+    if (!token) throw new Error('Invalid token')
 
-    const client = await OAuthClient.findById(token.client)
-    // if (client.trusted) return done(null, client, token)
+    const { user: userId, clientId } = token.payload
 
-    if (token.user !== null) {
-      const user = await OAuthUser.findById(token.user)
-      if (!user) return done(null, false)
-      return done(null, user.toJSON(), token)
-    }
+    const user = (userId)
+      ? await OAuthUser.findById(userId)
+      : await OAuthClient.findByClientId(clientId)
 
-    done(null, client.toJSON(), token)
+    done(null, user, token.payload)
   } catch (err) {
     done(err)
   }
