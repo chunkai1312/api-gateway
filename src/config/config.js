@@ -26,9 +26,29 @@ export default {
   },
 
   mailer: {
-    sender: { name: 'Shielder', address: 'no-reply@example.com' },
-    sendgrid: { key: '' }
+    sender: { name: 'Shields', address: 'no-reply@example.com' }
   },
 
+  /**
+   * Set HTTP proxy for API services.
+   *
+   * @see https://github.com/chimurai/http-proxy-middleware#readme
+   *
+   * @example
+   * proxyTable: {
+   *   'business': {
+   *     target: 'http://127.0.0.1:8081',
+   *     changeOrigin: true,
+   *     pathRewrite: { '^/business': '/api' },
+   *
+   *     // additional option, set to limit accessing
+   *     authorize: {
+   *       public: false,      // default = false
+   *       trustedOnly: false  // default = false
+   *       scope: 'business'   // default = ''
+   *     }
+   *   }
+   * }
+   */
   proxyTable: {}
 }
