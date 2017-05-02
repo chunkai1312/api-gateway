@@ -11,8 +11,7 @@ global.navigator.userAgent = global.navigator.userAgent || 'all'
 
 const engine = ReactEngine.server.create({
   routes: require('./views/routes'),
-  routesFilePath: path.join(__dirname, '/views/routes.js'),
-  performanceCollector: (stats) => console.log(stats)
+  routesFilePath: path.join(__dirname, '/views/routes.js')
 })
 
 connectMongoDB()
