@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto'
 import mongoose from 'mongoose'
+import mongooseHidden from 'mongoose-hidden'
 import uuid from 'uuid/v4'
 
 const OAuthClientSchema = new mongoose.Schema({
@@ -9,6 +10,13 @@ const OAuthClientSchema = new mongoose.Schema({
   name: { type: String },
   trusted: { type: Boolean, default: false }
 }, { collection: 'oauth_clients', timestamps: true })
+
+/**
+ * @see https://github.com/mblarsen/mongoose-hidden
+ */
+OAuthClientSchema.set('toJSON', { getters: true, virtuals: true })
+OAuthClientSchema.set('toObject', { getters: true, virtuals: true })
+OAuthClientSchema.plugin(mongooseHidden())
 
 OAuthClientSchema.pre('save', function (next) {
   if (!this.isNew) return next()

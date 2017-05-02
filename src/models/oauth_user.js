@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import mongooseHidden from 'mongoose-hidden'
 import credential from 'credential'
 import jwt from 'jsonwebtoken'
 
@@ -20,9 +21,6 @@ const OAuthUserSchema = new mongoose.Schema({
   }
 }, { collection: 'oauth_users', timestamps: true })
 
-OAuthUserSchema.set('toJSON', { getters: true, virtuals: true })
-OAuthUserSchema.set('toObject', { getters: true, virtuals: true })
-
 OAuthUserSchema.virtual('profile.name')
   .get(function () {
     return `${this.profile.firstName} ${this.profile.lastName}`
@@ -31,6 +29,13 @@ OAuthUserSchema.virtual('profile.name')
     this.profile.firstName = value.substr(0, value.indexOf(' '))
     this.profile.lastName = value.substr(value.indexOf(' ') + 1)
   })
+
+/**
+ * @see https://github.com/mblarsen/mongoose-hidden
+ */
+OAuthUserSchema.set('toJSON', { getters: true, virtuals: true })
+OAuthUserSchema.set('toObject', { getters: true, virtuals: true })
+OAuthUserSchema.plugin(mongooseHidden())
 
 OAuthUserSchema.pre('save', function (next) {
   if (!this.isModified('password')) return next()
