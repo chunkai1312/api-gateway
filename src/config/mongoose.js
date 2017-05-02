@@ -4,11 +4,6 @@ import config from '../config'
 
 mongoose.Promise = global.Promise
 
-/**
- * @see https://github.com/mblarsen/mongoose-hidden
- */
-mongoose.plugin(mongooseHidden())
-
 export default function connectMongoDB () {
   mongoose.connect(config.mongoDB.uri, config.mongoDB.options)
 
