@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-import mongooseHidden from 'mongoose-hidden'
 import config from '../config'
 
 mongoose.Promise = global.Promise
