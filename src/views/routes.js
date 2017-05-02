@@ -18,7 +18,7 @@ export default (
         <Route path="/oauth2/authorize" component={Authorize} />
         <Route path="/password/forgot" component={PasswordForgot} />
         <Route path="/password/reset/:token" component={PasswordReset} />
-        <Route path="*" component={NotFount} />
+        <Route path="/*" component={NotFount} />
       </Route>
     </Route>
   </Router>
