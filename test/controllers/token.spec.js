@@ -3,7 +3,7 @@ import { Types } from 'mongoose'
 import app from '../../src/app'
 import OAuthToken, { types, createToken } from '../../src/models/oauth_token'
 
-describe('Token API:', () => {
+describe('Token Controller:', () => {
   beforeAll(async () => {
     await OAuthToken.remove()
   })
@@ -13,7 +13,7 @@ describe('Token API:', () => {
   })
 
   describe('GET /oauth2/token/info', () => {
-    it('should respond error when the requested token is invalid', async () => {
+    it('should respond 400 with error when the requested token is invalid', async () => {
       return request(app)
         .get('/oauth2/token/info?access_token=1234567890')
         .expect('Content-Type', /json/)
@@ -42,7 +42,7 @@ describe('Token API:', () => {
   })
 
   describe('GET /oauth2/token/revoke', () => {
-    it('should respond error when the requested token is invalid', async () => {
+    it('should respond 400 with error when the requested token is invalid', async () => {
       return request(app)
         .get('/oauth2/token/revoke?access_token=1234567890')
         .expect('Content-Type', /json/)

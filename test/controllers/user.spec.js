@@ -2,7 +2,7 @@ import request from 'supertest'
 import app from '../../src/app'
 import OAuthUser from '../../src/models/oauth_user'
 
-describe('OAuth User API:', () => {
+describe('User Controller:', () => {
   let user
 
   beforeAll(async () => {

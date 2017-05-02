@@ -2,7 +2,7 @@ import request from 'supertest'
 import app from '../../src/app'
 import OAuthClient from '../../src/models/oauth_client'
 
-describe('OAuth Client API:', () => {
+describe('Client Controller:', () => {
   let client
 
   beforeAll(async () => {
