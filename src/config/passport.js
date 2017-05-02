@@ -84,13 +84,13 @@ const bearer = new BearerStrategy(async (accessToken, done) => {
     const token = await OAuthToken.findToken(accessToken)
     if (!token) throw new Error('Invalid token')
 
-    const { user: userId, clientId } = token.payload
+    const { user: userId, clientId, scope } = token.payload
 
     const user = (userId)
       ? await OAuthUser.findById(userId)
       : await OAuthClient.findByClientId(clientId)
 
-    done(null, user, token.payload)
+    done(null, user, { scope })
   } catch (err) {
     done(err)
   }
