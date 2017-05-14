@@ -8,8 +8,8 @@ export default (options = { public: false, scope: '' }) => {
     (req, res, next) => {
       const scopes = req.authInfo.scope && req.authInfo.scope.split(',')
       const hasScope = scopes.includes(options.scope)
-      if (options.scope === '*') next()
-      if (hasScope) next()
+      if (options.scope === '*') return next()
+      if (hasScope) return next()
       res.status(401).json({ message: 'Unauthorized' })
     }
   ]
