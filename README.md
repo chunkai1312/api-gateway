@@ -1,4 +1,6 @@
-# shielder [![JavaScript Style Guide][standardjs-image]][standardjs-url]
+# shields
+
+[![JavaScript Style Guide][standardjs-image]][standardjs-url]
 
 > WIP
 
