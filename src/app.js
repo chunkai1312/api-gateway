@@ -3,8 +3,8 @@ import express from 'express'
 import ReactEngine from 'react-engine'
 import middlewares, { httpProxy, errorHandler } from './middlewares'
 import routes from './routes'
-import connectMongoDB from './config/mongoose'
-import setupPassport from './config/passport'
+import './config/mongoose'
+import './config/passport'
 
 global.navigator = global.navigator || {}
 global.navigator.userAgent = global.navigator.userAgent || 'all'
@@ -13,9 +13,6 @@ const engine = ReactEngine.server.create({
   routes: require('./views/routes'),
   routesFilePath: path.join(__dirname, '/views/routes.js')
 })
-
-connectMongoDB()
-setupPassport()
 
 const app = express()
 
