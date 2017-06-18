@@ -1,11 +1,23 @@
 import path from 'path'
 
 export default {
-  env: process.env.NODE_ENV || 'development',
-  port: process.env.PORT || 8080,
-  root: path.normalize(`${__dirname}/../..`),
+  env: process.env.NODE_ENV,
+  port: process.env.PORT,
+  host: process.env.HOST,
 
-  baseUrl: 'http://localhost:8080',
+  baseUrl: process.env.BASE_URL,
+  root: path.normalize(`${__dirname}/../..`),
+  context: path.normalize(`${__dirname}/..`),
+
+  mongoDB: {
+    uri: process.env.MONGODB_URI,
+    options: {}
+  },
+
+  redis: {
+    port: process.env.REDIS_PORT,
+    host: process.env.REDIS_HOST
+  },
 
   session: {
     secret: 'ssBQv9iDLkBlmF9aL0EO5D0jK9Upr1Yc',
@@ -21,12 +33,14 @@ export default {
   },
 
   jwt: {
-    secret: 'AC207Av50AyRQrWW07tABl1832f70i8u',
+    secret: process.env.JWT_SECRET,
     options: {}
   },
 
   mailer: {
-    sender: { name: 'Shields', address: 'no-reply@example.com' }
+    provider: 'mailgun',
+    from: { name: 'Punwave', address: 'no-reply@punwave.com' },
+    mailgun: { auth: { api_key: process.env.MAILGUN_SECRET, domain: process.env.MAILGUN_DOMAIN } }
   },
 
   /**

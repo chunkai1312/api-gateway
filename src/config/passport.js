@@ -3,7 +3,8 @@ import { Strategy as LocalStrategy } from 'passport-local'
 import { BasicStrategy } from 'passport-http'
 import { Strategy as ClientPasswordStrategy } from 'passport-oauth2-client-password'
 import { Strategy as BearerStrategy } from 'passport-http-bearer'
-import { OAuthUser, OAuthClient } from '../models'
+import OAuthUser from '../models/oauth_user'
+import OAuthClient from '../models/oauth_client'
 import OAuthToken, { verifyToken } from '../models/oauth_token'
 
 /**
@@ -13,7 +14,7 @@ import OAuthToken, { verifyToken } from '../models/oauth_token'
  * Anytime a request is made to authorize an application, we must ensure that
  * a user is logged in before asking them to approve the request.
  */
-const local = new LocalStrategy(async (usernameOrEmail, password, done) => {
+passport.use(new LocalStrategy(async (usernameOrEmail, password, done) => {
   try {
     const user = await OAuthUser.findByUsernameOrEmail(usernameOrEmail)
     if (!user) return done(null, false)
@@ -23,7 +24,7 @@ const local = new LocalStrategy(async (usernameOrEmail, password, done) => {
   } catch (err) {
     done(err)
   }
-})
+}))
 
 /**
  * BasicStrategy & ClientPasswordStrategy
@@ -36,7 +37,7 @@ const local = new LocalStrategy(async (usernameOrEmail, password, done) => {
  * to the `Authorization` header).  While this approach is not recommended by
  * the specification, in practice it is quite common.
  */
-const basic = new BasicStrategy(async (username, password, done) => {
+passport.use(new BasicStrategy(async (username, password, done) => {
   try {
     const client = await OAuthClient.findByClientId(username)
     if (!client) return done(null, false)
@@ -45,7 +46,7 @@ const basic = new BasicStrategy(async (username, password, done) => {
   } catch (err) {
     done(err)
   }
-})
+}))
 
 /**
  * Client Password strategy
@@ -55,7 +56,7 @@ const basic = new BasicStrategy(async (username, password, done) => {
  * which accepts those credentials and calls done providing a client.
  */
 
-const oauth2ClientPassword = new ClientPasswordStrategy(async (clientId, clientSecret, done) => {
+passport.use(new ClientPasswordStrategy(async (clientId, clientSecret, done) => {
   try {
     const client = await OAuthClient.findByClientId(clientId)
     if (!client) return done(null, false)
@@ -64,7 +65,7 @@ const oauth2ClientPassword = new ClientPasswordStrategy(async (clientId, clientS
   } catch (err) {
     done(err)
   }
-})
+}))
 
 /**
  * BearerStrategy
@@ -77,7 +78,7 @@ const oauth2ClientPassword = new ClientPasswordStrategy(async (clientId, clientS
  * To keep this example simple, restricted scopes are not implemented, and this is just for
  * illustrative purposes
  */
-const bearer = new BearerStrategy(async (accessToken, done) => {
+passport.use(new BearerStrategy(async (accessToken, done) => {
   try {
     verifyToken(accessToken)
 
@@ -94,7 +95,7 @@ const bearer = new BearerStrategy(async (accessToken, done) => {
   } catch (err) {
     done(err)
   }
-})
+}))
 
 // Register serialialization and deserialization functions.
 //
@@ -108,15 +109,5 @@ const bearer = new BearerStrategy(async (accessToken, done) => {
 // client object is serialized into the session.  Typically this will be a
 // simple matter of serializing the client's ID, and deserializing by finding
 // the client by ID from the database.
-
-const serializeUser = (user, done) => done(null, user)
-const deserializeUser = (user, done) => done(null, user)
-
-export default function setupPassport () {
-  passport.use(local)
-  passport.use(basic)
-  passport.use(oauth2ClientPassword)
-  passport.use(bearer)
-  passport.serializeUser(serializeUser)
-  passport.deserializeUser(deserializeUser)
-}
+passport.serializeUser((user, done) => done(null, user))
+passport.deserializeUser((user, done) => done(null, user))
