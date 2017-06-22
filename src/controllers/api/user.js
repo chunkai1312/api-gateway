@@ -1,15 +1,24 @@
 import error from 'http-errors'
 import { Types } from 'mongoose'
-import { OAuthUser } from '../models'
+import OAuthUser from '../../models/oauth_user'
 
-export default {
+function UserController (dependencies = {}) {
+  const userController = {}
 
-  index: async (req, res) => {
+  /**
+   * GET /oauth2/users
+   * Find all users.
+   */
+  userController.index = async (req, res) => {
     const users = await OAuthUser.find()
     res.status(200).json(users)
-  },
+  }
 
-  create: async (req, res) => {
+  /**
+   * POST /oauth2/users
+   * Create a new user.
+   */
+  userController.create = async (req, res) => {
     const userByUsername = await OAuthUser.findByUsername(req.body.username)
     if (userByUsername) return res.status(400).json({ message: 'Username already exists' })
 
@@ -18,30 +27,46 @@ export default {
 
     const user = await OAuthUser.create(req.body)
     res.status(201).json(user)
-  },
+  }
 
-  show: async (req, res) => {
+  /**
+   * GET /oauth2/users/:id
+   * Find one user by ID.
+   */
+  userController.show = async (req, res) => {
     if (!Types.ObjectId.isValid(req.params.id)) throw error(404)
     const user = await OAuthUser.findById(req.params.id)
     if (!user) throw error(404)
     res.status(200).json(user)
-  },
+  }
 
-  update: async (req, res) => {
+  /**
+   * PUT /oauth2/users/:id
+   * Update an existing user by ID.
+   */
+  userController.update = async (req, res) => {
     if (!Types.ObjectId.isValid(req.params.id)) throw error(404)
     const user = await OAuthUser.findByIdAndUpdate(req.params.id, req.body, { new: true })
     if (!user) throw error(404)
     res.status(200).json(user)
-  },
+  }
 
-  destroy: async (req, res) => {
+  /**
+   * DELETE /oauth2/users/:id
+   * Destroy an existing user by ID.
+   */
+  userController.destroy = async (req, res) => {
     if (!Types.ObjectId.isValid(req.params.id)) throw error(404)
     const user = await OAuthUser.findByIdAndRemove(req.params.id)
     if (!user) throw error(404)
     res.status(200).json({ id: user.id, deleted: true })
-  },
+  }
 
-  changePassword: async (req, res) => {
+  /**
+   * PUT /oauth2/users/:id/password
+   * Change password of the user.
+   */
+  userController.changePassword = async (req, res) => {
     if (!Types.ObjectId.isValid(req.params.id)) throw error(404)
     const user = await OAuthUser.findById(req.params.id)
     if (!user) throw error(404)
@@ -52,4 +77,7 @@ export default {
     res.status(204).end()
   }
 
+  return userController
 }
+
+export default UserController

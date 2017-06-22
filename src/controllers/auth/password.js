@@ -55,7 +55,7 @@ function PasswordController (dependencies = { authService: AuthService() }) {
    */
   passwordController.postReset = async (req, res) => {
     req.assert('password', 'Password must be at least 4 characters long.').len(4)
-    req.assert('confirm', 'Passwords must match.').equals(req.body.password)
+    req.assert('confirmPassword', 'Passwords must match.').len(4).equals(req.body.password)
 
     const errors = req.validationErrors()
     if (errors) {

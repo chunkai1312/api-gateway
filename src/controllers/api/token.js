@@ -1,8 +1,13 @@
-import OAuthToken, { verifyToken } from '../models/oauth_token'
+import OAuthToken, { verifyToken } from '../../models/oauth_token'
 
-export default {
+function TokenController (dependencies = {}) {
+  const tokenController = {}
 
-  info: async (req, res) => {
+  /**
+   * GET /oauth2/token/info
+   * Validate a token.
+   */
+  tokenController.info = async (req, res) => {
     try {
       const accessToken = req.query.access_token
       verifyToken(accessToken)
@@ -17,9 +22,13 @@ export default {
     } catch (err) {
       res.status(400).json({ error: 'invalid_token' })
     }
-  },
+  }
 
-  revoke: async (req, res) => {
+  /**
+   * GET /oauth2/token/revoke
+   * Revoke a token.
+   */
+  tokenController.revoke = async (req, res) => {
     try {
       const token = req.query.token
       verifyToken(token)
@@ -33,4 +42,7 @@ export default {
     }
   }
 
+  return tokenController
 }
+
+export default TokenController
