@@ -31,17 +31,16 @@ class Mailer {
   }
 
   /**
-   * Send password reset mail via SendGrid.
+   * Send password reset email..
    *
-   * @param  {string}   to - The email address.
-   * @param  {string}   name - The name of user.
-   * @param  {string}   passwordResetToken - The password reset token of the user.
+   * @param  {User}     user - The mail will be sent to.
    * @return {Promise}  The result of sending mail.
    */
-  sendPasswordReset (to, name, passwordResetToken) {
+  sendPasswordResetEmail (user) {
+    const { email: to, profile, passwordReset } = user
     const template = fs.readFileSync(path.join(templateDir, 'password_reset.html'), 'utf-8')
     const compiled = _.template(template)
-    const html = compiled({ name, url: `${config.baseUrl}/password/reset/${passwordResetToken}` })
+    const html = compiled({ name: profile.name, url: `${config.baseUrl}/password/reset/${passwordReset.token}` })
     const options = { to, html }
     options.subject = 'Reset your password'
     return this.send(options)
