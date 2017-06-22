@@ -19,8 +19,13 @@ body {
     width: 225px !important;
   }
 
+  .text-field-wrapper {
+    display: flex;
+  }
+
   .text-field {
     width: 350px !important;
+    margin: 0 10px;
   }
 
 }
@@ -40,8 +45,13 @@ body {
     width: 225px !important;
   }
 
+  .text-field-wrapper {
+    display: flex;
+  }
+
   .text-field {
     width: 350px !important;
+    margin: 0 10px;
   }
 
 }
@@ -57,8 +67,13 @@ body {
     width: 200px !important;
   }
 
+  .text-field-wrapper {
+    display: flex;
+  }
+
   .text-field {
     width: 300px !important;
+    margin: 0 10px;
   }
 
 }
@@ -74,8 +89,13 @@ body {
     width: 200px !important;
   }
 
+  .text-field-wrapper {
+    display: flex;
+  }
+
   .text-field {
     width: 300px !important;
+    margin: 0 10px;
   }
 
 }
@@ -87,7 +107,9 @@ body {
 
 @media (min-width: 481px) and (max-width: 767px) {
 
-
+  .text-field {
+    width: 100% !important;
+  }
 
 }
 
@@ -98,6 +120,8 @@ body {
 
 @media (min-width: 320px) and (max-width: 480px) {
 
-
+  .text-field {
+    width: 100% !important;
+  }
 
 }
