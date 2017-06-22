@@ -3,18 +3,18 @@ import path from 'path'
 import nodemailer from 'nodemailer'
 import mgTransport from 'nodemailer-mailgun-transport'
 import _ from 'lodash'
-import config, { mailer } from '../../config'
+import config from '../../config'
 
 const templateDir = path.join(__dirname, 'templates')
 
-class Mailer {
-  constructor (config) {
-    this.config = config || mailer
-    this.transporter = nodemailer.createTransport(mgTransport(mailer[this.config.provider]))
-  }
+function MailerService (options, dependencies = { nodemailer }) {
+  const mailer = options || config.mailer
+  const transporter = nodemailer.createTransport(mgTransport(mailer[mailer.provider]))
+
+  const mailerService = {}
 
   /**
-   * Send mail via Mailgun.
+   * Send email.
    *
    * @param  {Object}   options - The email options.
    * @param  {string}   options.to - The email address of the receiver.
@@ -24,27 +24,29 @@ class Mailer {
    * @param  {string}   options.html - The HTML body of the email.
    * @return {Promise}  The result of sending mail.
    */
-  send (options) {
+  mailerService.send = (options) => {
     const from = `${mailer.from.name} <${mailer.from.address}>`
     options = Object.assign({ from }, options)
-    return this.transporter.sendMail(options)
+    return transporter.sendMail(options)
   }
 
   /**
-   * Send password reset email..
+   * Send password reset email.
    *
    * @param  {User}     user - The mail will be sent to.
    * @return {Promise}  The result of sending mail.
    */
-  sendPasswordResetEmail (user) {
+  mailerService.sendPasswordResetEmail = (user) => {
     const { email: to, profile, passwordReset } = user
     const template = fs.readFileSync(path.join(templateDir, 'password_reset.html'), 'utf-8')
     const compiled = _.template(template)
     const html = compiled({ name: profile.name, url: `${config.baseUrl}/password/reset/${passwordReset.token}` })
     const options = { to, html }
     options.subject = 'Reset your password'
-    return this.send(options)
+    return mailerService.send(options)
   }
+
+  return mailerService
 }
 
-export default Mailer
+export default MailerService
