@@ -39,13 +39,13 @@ class PasswordForgot extends Component {
 
         {messages.success
           ? <p>{messages.success && messages.success.map(success => success.msg)}</p>
-          : <p>{messages.info && messages.info.map(info => info) || 'Enter your email address and we will send you a link to reset your password.'}</p>
+          : <p>Enter your email address and we will send you a link to reset your password.</p>
         }
 
         {messages.success
           ? (
             <div style={styles.buttonWrapper}>
-              <RaisedButton label="Return to Login" primary onClick={() => router.push('/login')} />
+              <RaisedButton label="Return to Login" primary href="/login" />
             </div>
           ) : (
             <form action="/password/forgot" method="POST">
