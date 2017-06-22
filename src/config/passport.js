@@ -6,6 +6,9 @@ import { Strategy as BearerStrategy } from 'passport-http-bearer'
 import OAuthUser from '../models/oauth_user'
 import OAuthClient from '../models/oauth_client'
 import OAuthToken, { verifyToken } from '../models/oauth_token'
+import AuthService from '../services/auth'
+
+const authService = AuthService()
 
 /**
  * LocalStrategy
@@ -14,16 +17,9 @@ import OAuthToken, { verifyToken } from '../models/oauth_token'
  * Anytime a request is made to authorize an application, we must ensure that
  * a user is logged in before asking them to approve the request.
  */
-passport.use(new LocalStrategy(async (usernameOrEmail, password, done) => {
-  try {
-    const user = await OAuthUser.findByUsernameOrEmail(usernameOrEmail)
-    if (!user) return done(null, false)
-    const isAuthenticated = await user.authenticate(password)
-    if (!isAuthenticated) return done(null, false)
-    done(null, user)
-  } catch (err) {
-    done(err)
-  }
+passport.use(new LocalStrategy({ usernameField: 'login' }, async (login, password, done) => {
+  const user = await authService.authenticate(login, password)
+  return user ? done(null, user) : done(null, false)
 }))
 
 /**
