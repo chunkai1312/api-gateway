@@ -45,6 +45,5 @@ if (config.env === 'test') middlewares.shift()
 export errorHandler from './errorhandler'
 export httpProxy from './proxy'
 export authorize from './authorize'
-export validator from './validator'
 
 export default () => compose(middlewares)
