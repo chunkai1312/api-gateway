@@ -28,6 +28,12 @@ class PasswordReset extends Component {
 
   render () {
     const { router, username, messages } = this.props
+
+    const showErrorText = (name) => {
+      const message = messages.errors && messages.errors.find(message => message.param === name)
+      return message ? message.msg : null
+    }
+
     return (
       <div style={styles.passwordForgot}>
         <img src="/img/punwave.png" alt="Punwave" style={styles.logo} className="logo" />
@@ -45,10 +51,24 @@ class PasswordReset extends Component {
           ) : (
             <form action="" method="POST">
               <div>
-                <TextField id="password" name="password" type="password" floatingLabelText={'Password'} className="text-field" />
+                <TextField
+                  id="password"
+                  name="password"
+                  type="password"
+                  floatingLabelText="Password"
+                  errorText={showErrorText('password')}
+                  className="text-field"
+                />
               </div>
               <div>
-                <TextField id="confirm" name="confirm" type="password" floatingLabelText={'Confirm Password'} className="text-field" />
+                <TextField
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  floatingLabelText="Confirm Password"
+                  errorText={showErrorText('confirmPassword')}
+                  className="text-field"
+                />
               </div>
               <br />
               <div style={styles.buttonWrapper}>

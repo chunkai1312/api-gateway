@@ -16,33 +16,56 @@ const styles = {
     width: 150
   },
   buttonWrapper: {
-    margin: '1em 0'
+    margin: '0.5em 0'
   }
 }
 
 class Login extends Component {
   static propTypes = {
-    router: PropTypes.object
+    messages: PropTypes.object
   }
 
   render () {
-    const { router } = this.props
+    const { messages } = this.props
+
+    const showErrorText = (name) => {
+      const message = messages.errors && messages.errors.find(message => message.param === name)
+      return message ? message.msg : null
+    }
+
     return (
       <div style={styles.loginPage}>
         <img src="/img/punwave.png" alt="Punwave" style={styles.logo} className="logo" />
         <form action="/login" method="POST">
           <div>
-            <TextField id="username" name="username" type="text" floatingLabelText={'Username'} className="text-field" />
+            <TextField
+              id="login"
+              name="login"
+              type="text"
+              floatingLabelText="Username / Email"
+              errorText={showErrorText('login')}
+              className="text-field"
+            />
           </div>
           <div>
-            <TextField id="password" name="password" type="password" floatingLabelText={'Password'} className="text-field" />
+            <TextField
+              id="password"
+              name="password"
+              type="password"
+              floatingLabelText="Password"
+              errorText={showErrorText('password')}
+              className="text-field"
+            />
           </div>
           <br />
           <div style={styles.buttonWrapper}>
             <RaisedButton type="submit" label="Login" primary fullWidth />
           </div>
           <div style={styles.buttonWrapper}>
-            <FlatButton label="Forgot Your Password?" fullWidth onClick={() => router.push('/password/forgot')} />
+            <FlatButton label="Forgot Your Password?" fullWidth href="/password/forgot" />
+          </div>
+          <div style={styles.buttonWrapper}>
+            <FlatButton label="New to Punwave? Create Your Account!" fullWidth href="/signup" />
           </div>
         </form>
       </div>

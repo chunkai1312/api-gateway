@@ -22,12 +22,17 @@ const styles = {
 
 class PasswordForgot extends Component {
   static propTypes = {
-    router: PropTypes.object,
     messages: PropTypes.object
   }
 
   render () {
-    const { router, messages } = this.props
+    const { messages } = this.props
+
+    const showErrorText = (name) => {
+      const message = messages.errors && messages.errors.find(message => message.param === name)
+      return message ? message.msg : null
+    }
+
     return (
       <div style={styles.passwordForgot}>
         <img src="/img/punwave.png" alt="Punwave" style={styles.logo} className="logo" />
@@ -45,14 +50,21 @@ class PasswordForgot extends Component {
           ) : (
             <form action="/password/forgot" method="POST">
               <div>
-                <TextField id="email" name="email" type="email" floatingLabelText={'Email'} className="text-field" />
+                <TextField
+                  id="email"
+                  name="email"
+                  type="email"
+                  floatingLabelText={'Email'}
+                  errorText={showErrorText('email')}
+                  className="text-field"
+                />
               </div>
               <br />
               <div style={styles.buttonWrapper}>
                 <RaisedButton type="submit" label="Send Password Reset Email" primary fullWidth />
               </div>
               <div style={styles.buttonWrapper}>
-                <FlatButton label="Return to Login" fullWidth onClick={() => router.push('/login')} />
+                <FlatButton label="Return to Login" fullWidth href="/login" />
               </div>
             </form>
           )}
