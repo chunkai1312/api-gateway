@@ -10,6 +10,7 @@ import cors from 'cors'
 import helmet from 'helmet'
 import methodOverride from 'method-override'
 import passport from 'passport'
+import expressValidator from 'express-validator'
 import { compose } from 'compose-middleware'
 import expressWinston from 'express-winston'
 import config from '../config'
@@ -28,6 +29,7 @@ const middlewares = [
   compression(),
   cookieParser(),
   session(sessionConfig),
+  expressValidator(),
   cors(),
   helmet(),
   methodOverride(),
