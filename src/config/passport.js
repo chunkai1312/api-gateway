@@ -7,8 +7,10 @@ import OAuthUser from '../models/oauth_user'
 import OAuthClient from '../models/oauth_client'
 import OAuthToken, { verifyToken } from '../models/oauth_token'
 import AuthService from '../services/auth'
+import OAuthService from '../services/oauth/oauth'
 
 const authService = AuthService()
+const oauthService = OAuthService()
 
 /**
  * LocalStrategy
@@ -34,14 +36,8 @@ passport.use(new LocalStrategy({ usernameField: 'login' }, async (login, passwor
  * the specification, in practice it is quite common.
  */
 passport.use(new BasicStrategy(async (username, password, done) => {
-  try {
-    const client = await OAuthClient.findByClientId(username)
-    if (!client) return done(null, false)
-    if (client.clientSecret !== password) return done(null, false)
-    done(null, client)
-  } catch (err) {
-    done(err)
-  }
+  const client = await oauthService.getClient(username, password)
+  return client ? done(null, client) : done(null, false)
 }))
 
 /**
@@ -53,14 +49,8 @@ passport.use(new BasicStrategy(async (username, password, done) => {
  */
 
 passport.use(new ClientPasswordStrategy(async (clientId, clientSecret, done) => {
-  try {
-    const client = await OAuthClient.findByClientId(clientId)
-    if (!client) return done(null, false)
-    if (client.clientSecret !== clientSecret) return done(null, false)
-    return done(null, client)
-  } catch (err) {
-    done(err)
-  }
+  const client = await oauthService.getClient(clientId, clientSecret)
+  return client ? done(null, client) : done(null, false)
 }))
 
 /**
