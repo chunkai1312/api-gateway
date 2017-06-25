@@ -29,7 +29,7 @@ $ npm run build
 ## Running
 
 ```
-$ npm run start
+$ npm start
 ```
 
 ## Usage
