@@ -3,12 +3,12 @@ import mongooseHidden from 'mongoose-hidden'
 import mongooseDelete from 'mongoose-delete'
 
 const OAuthCodeSchema = new mongoose.Schema({
-  code: { type: String },
+  authorizationCode: { type: String },
   client: { type: mongoose.Schema.Types.ObjectId, ref: 'OAuthClient', required: true },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'OAuthUser', required: true },
   redirectUri: { type: String },
   scope: { type: String },
-  expiresAt: { type: Date }
+  expiresAt: { type: Date, expires: 0 }
 }, { collection: 'oauth_codes', timestamps: true })
 
 OAuthCodeSchema.set('toJSON', { getters: true, virtuals: true })
