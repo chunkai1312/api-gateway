@@ -2,9 +2,10 @@ import querystring from 'querystring'
 import oauth2orize from 'oauth2orize'
 import passport from 'passport'
 import login from 'connect-ensure-login'
-import { OAuthUser, OAuthClient } from '../models/'
-import OAuthToken, { types, createToken } from '../models/oauth_token'
+import { OAuthService } from '../services/oauth'
 import { oauth2, baseUrl } from '../config'
+
+const oauthService = OAuthService()
 
 // create OAuth 2.0 server
 const server = oauth2orize.createServer()
@@ -21,13 +22,12 @@ const expiresIn = { expires_in: oauth2.accessToken.expiresIn }
  * duration, etc. as parsed by the application.  The application issues a code,
  * which is bound to these values, and will be exchanged for an access token.
  */
-server.grant(oauth2orize.grant.code((client, redirectURI, user, ares, done) => {
-  const authorizationCode = createToken({ subject: user.id, expiresIn: oauth2.authorizationCode.expiresIn })
-  const payload = { user: user.id, clientId: client.clientId, redirectURI: redirectURI, scope: ares.scope }
-
-  OAuthToken.saveToken(authorizationCode, types.AUTHORIZATION_CODE, payload)
-    .then(() => done(null, authorizationCode))
-    .catch(() => done(null, false))
+server.grant(oauth2orize.grant.code(async (client, redirectUri, user, ares, done) => {
+  const { scope } = ares
+  const authorizationCode = await oauthService.generateAuthorizationCode(client, user, scope)
+  const code = { authorizationCode, redirectUri, scope }
+  await oauthService.saveAuthorizationCode(code, client, user)
+  done(null, authorizationCode)
 }))
 
 /**
@@ -38,13 +38,12 @@ server.grant(oauth2orize.grant.code((client, redirectURI, user, ares, done) => {
  * duration, etc. as parsed by the application.  The application issues a token,
  * which is bound to these values.
  */
-server.grant(oauth2orize.grant.token((client, user, ares, done) => {
-  const accessToken = createToken({ subject: user.id, expiresIn: oauth2.accessToken.expiresIn })
-  const payload = { user: user.id, clientId: client.clientId, scope: ares.scope }
-
-  OAuthToken.saveToken(accessToken, types.AUTHORIZATION_CODE, payload)
-    .then(() => done(null, accessToken, expiresIn))
-    .catch(() => done(null, false))
+server.grant(oauth2orize.grant.token(async (client, user, ares, done) => {
+  const { scope } = ares
+  const accessToken = await oauthService.generateAccessToken(client, user, scope)
+  const token = { accessToken, scope }
+  await oauthService.saveToken(token, client, user)
+  done(null, accessToken, expiresIn)
 }))
 
 /**
@@ -55,23 +54,20 @@ server.grant(oauth2orize.grant.token((client, user, ares, done) => {
  * are validated, the application issues an access token on behalf of the user who
  * authorized the code.
  */
-server.exchange(oauth2orize.exchange.code((client, code, redirectURI, done) => {
-  OAuthToken.removeToken(code)
-    .then(token => token.validateAuthorizationCode(code, client, redirectURI))
-    .then(token => {
-      const accessToken = createToken({ subject: token.payload.user.toString(), expiresIn: oauth2.accessToken.expiresIn })
-      const refreshToken = createToken({ subject: token.payload.user.toString(), expiresIn: oauth2.refreshToken.expiresIn })
-      const payload = token.payload
+server.exchange(oauth2orize.exchange.code(async (client, code, redirectURI, done) => {
+  try {
+    const authCode = await oauthService.getAuthorizationCode(code)
+    if (!authCode) return done(null, false)
 
-      return Promise.all([
-        Promise.resolve(accessToken),
-        Promise.resolve(refreshToken),
-        OAuthToken.saveToken(accessToken, types.ACCESS_TOKEN, payload),
-        OAuthToken.saveToken(refreshToken, types.REFRESH_TOKEN, payload)
-      ])
-    })
-    .then(([accessToken, refreshToken]) => done(null, accessToken, refreshToken, expiresIn))
-    .catch(() => done(null, false))
+    const { user, scope } = authCode
+    const accessToken = await oauthService.generateAccessToken(client, user, scope)
+    const refreshToken = await oauthService.generateRefreshToken(client, user, scope)
+    const token = { accessToken, refreshToken, scope }
+    await oauthService.saveToken(token, client, user)
+    done(null, accessToken, refreshToken, expiresIn)
+  } catch (e) {
+    done(null, false)
+  }
 }))
 
 /**
@@ -81,27 +77,15 @@ server.exchange(oauth2orize.exchange.code((client, code, redirectURI, done) => {
  * from the token request for verification. If these values are validated, the
  * application issues an access token on behalf of the user who authorized the code.
  */
-server.exchange(oauth2orize.exchange.password((client, username, password, scope, done) => {
-  OAuthUser.findByUsername(username)
-    .then(user => {
-      if (!user) throw new Error('User does not exist')
-      return Promise.all([ Promise.resolve(user), user.authenticate(password) ])
-    })
-    .then(([ user, isAuthenticate ]) => {
-      if (!isAuthenticate) throw new Error('User password does not match')
-      const accessToken = createToken({ subject: user.id, expiresIn: oauth2.accessToken.expiresIn })
-      const refreshToken = createToken({ subject: user.id, expiresIn: oauth2.refreshToken.expiresIn })
-      const payload = { user: user.id, clientId: client.clientId, scope: scope }
+server.exchange(oauth2orize.exchange.password(async (client, username, password, scope, done) => {
+  const user = await oauthService.getUser(username, password)
+  if (!user) return done(null, false)
 
-      return Promise.all([
-        Promise.resolve(accessToken),
-        Promise.resolve(refreshToken),
-        OAuthToken.saveToken(accessToken, types.ACCESS_TOKEN, payload),
-        OAuthToken.saveToken(refreshToken, types.REFRESH_TOKEN, payload)
-      ])
-    })
-    .then(([accessToken, refreshToken]) => done(null, accessToken, refreshToken, expiresIn))
-    .catch(() => done(null, false))
+  const accessToken = await oauthService.generateAccessToken(client, user, scope)
+  const refreshToken = await oauthService.generateRefreshToken(client, user, scope)
+  const token = { accessToken, refreshToken, scope }
+  await oauthService.saveToken(token, client, user)
+  done(null, accessToken, refreshToken, expiresIn)
 }))
 
 /**
@@ -111,13 +95,12 @@ server.exchange(oauth2orize.exchange.password((client, username, password, scope
  * password/secret from the token request for verification. If these values are validated, the
  * application issues an access token on behalf of the client who authorized the code.
  */
-server.exchange(oauth2orize.exchange.clientCredentials((client, scope, done) => {
-  const accessToken = createToken({ subject: client.clientId, expiresIn: oauth2.accessToken.expiresIn })
-  const payload = { user: null, clientId: client.clientId, scope: scope }
-
-  OAuthToken.saveToken(accessToken, types.ACCESS_TOKEN, payload)
-    .then(() => done(null, accessToken, null, expiresIn))
-    .catch(() => done(null, false))
+server.exchange(oauth2orize.exchange.clientCredentials(async (client, scope, done) => {
+  const user = await oauthService.getUserFromClient(client)
+  const accessToken = await oauthService.generateAccessToken(client, user, scope)
+  const token = { accessToken, scope }
+  await oauthService.saveToken(token, client, user)
+  done(null, accessToken, expiresIn)
 }))
 
 /**
@@ -127,20 +110,15 @@ server.exchange(oauth2orize.exchange.clientCredentials((client, scope, done) => 
  * request for verification.  If this value is validated, the application issues an access
  * token on behalf of the client who authorized the code
  */
-server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, done) => {
-  OAuthToken.findToken(refreshToken)
-    .then(token => token.validateRefreshToken(refreshToken, client))
-    .then(token => {
-      const accessToken = createToken({ subject: token.payload.user.toString(), expiresIn: oauth2.accessToken.expiresIn })
-      const payload = token.payload
+server.exchange(oauth2orize.exchange.refreshToken(async (client, refreshToken, scope, done) => {
+  const authToken = await oauthService.getRefreshToken(refreshToken)
+  if (!authToken) return done(null, false)
 
-      return Promise.all([
-        Promise.resolve(accessToken),
-        OAuthToken.saveToken(accessToken, types.ACCESS_TOKEN, payload)
-      ])
-    })
-    .then(([accessToken]) => done(null, accessToken, null, expiresIn))
-    .catch(() => done(null, false))
+  const { user } = authToken
+  const accessToken = await oauthService.generateAccessToken(client, user, scope)
+  const token = { accessToken, scope }
+  await oauthService.saveToken(token, client, user)
+  done(null, accessToken, expiresIn)
 }))
 
 /**
@@ -162,32 +140,30 @@ server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, 
  */
 const authorization = [
   login.ensureLoggedIn(`/login?continue=${baseUrl}/oauth2/authorize`),
-  server.authorization((clientId, redirectURI, scope, done) => {
-    OAuthClient.findByClientId(clientId)
-      .then(client => {
-        if (!client || !client.hasRedirectURI(redirectURI)) throw new Error('Redirect URI is invalid')
-        return done(null, client, redirectURI)
-      })
-      .catch(() => done(null, false))
+  server.authorization(async (clientId, redirectURI, scope, done) => {
+    const client = await oauthService.getClient(clientId)
+    if (!client) return done(null, false)
+
+    const hasRedirectURI = client.redirectUris.includes(redirectURI)
+    if (!hasRedirectURI) return done(null, false)
+
+    done(null, client, redirectURI)
   }),
   async (req, res, next) => {
-    OAuthClient.findByClientId(req.query.client_id)
-      .then(client => {
-        if (client.trusted) {
-          server.decision({ loadTransaction: false }, (request, callback) => {
-            callback(null, { allow: true })
-          })(req, res, next)
-        } else {
-          res.render(req.url, {
-            transactionID: req.oauth2.transactionID,
-            user: req.user,
-            client: req.oauth2.client,
-            scope: req.oauth2.req.scope,
-            logout: `/logout?continue=${querystring.escape(req.url)}`
-          })
-        }
+    const client = await oauthService.getClient(req.query.client_id)
+    if (client && client.trusted) {
+      server.decision({ loadTransaction: false }, (request, callback) => {
+        callback(null, { allow: true })
+      })(req, res, next)
+    } else {
+      res.render(req.url, {
+        transactionID: req.oauth2.transactionID,
+        user: req.user,
+        client: req.oauth2.client,
+        scope: req.oauth2.req.scope,
+        logout: `/logout?continue=${querystring.escape(req.url)}`
       })
-      .catch(err => next(err))
+    }
   }
 ]
 
@@ -231,16 +207,8 @@ const token = [
 // simple matter of serializing the client's ID, and deserializing by finding
 // the client by ID from the database.
 
-server.serializeClient((client, done) => {
-  done(null, client.id)
-})
-
-server.deserializeClient((id, done) => {
-  OAuthClient.findById(id, (err, client) => {
-    if (err) return done(err)
-    return done(err, client)
-  })
-})
+server.serializeClient((client, done) => done(null, client))
+server.deserializeClient((client, done) => done(null, client))
 
 export default {
   authorization,
