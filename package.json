@@ -1,7 +1,7 @@
 {
   "name": "shields",
   "version": "1.0.0",
-  "description": "An API Gateway written Node.js",
+  "description": "An OAuth 2.0 authorization server implementation based on OAuth2orize",
   "main": "index.js",
   "scripts": {
     "start": "node bin/server.js",
