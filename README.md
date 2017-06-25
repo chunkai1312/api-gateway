@@ -2,7 +2,37 @@
 
 [![JavaScript Style Guide][standardjs-image]][standardjs-url]
 
-> WIP
+> An OAuth 2.0 authorization server implementation based on OAuth2orize.
+
+## Install
+
+```
+$ git clone https://github.com/chunkai1312/shields.git
+$ cd shields
+$ npm install
+```
+
+## Usage
+
+## Developing
+
+```
+$ npm run dev
+```
+
+## Building
+
+```
+$ npm run build
+```
+
+## Running
+
+```
+$ npm run start
+```
+
+## Usage
 
 ## License
 
