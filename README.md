@@ -14,19 +14,19 @@ $ npm install
 
 ## Usage
 
-## Developing
+### Developing
 
 ```
 $ npm run dev
 ```
 
-## Building
+### Building
 
 ```
 $ npm run build
 ```
 
-## Running
+### Running
 
 ```
 $ npm start
