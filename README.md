@@ -32,8 +32,6 @@ $ npm run build
 $ npm start
 ```
 
-## Usage
-
 ## License
 
 MIT © [Chun-Kai Wang](https://github.com/chunkai1312)
