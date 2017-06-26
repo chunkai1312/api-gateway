@@ -69,7 +69,6 @@ function OAuthService (dependencies = {}) {
    */
   oauthService.getRefreshToken = async (refreshToken) => {
     const jwt = verifyToken(refreshToken)
-    console.log(jwt)
     const token = await OAuthToken.findOne({ refreshToken: jwt.jti })
     return token
   }
@@ -185,7 +184,9 @@ function OAuthService (dependencies = {}) {
    * Revoke a refresh token.
    */
   oauthService.revokeToken = async (token) => {
-
+    const { refreshToken } = token
+    const removed = await OAuthToken.findOneAndRemove({ refreshToken })
+    return !!removed
   }
 
   /**
