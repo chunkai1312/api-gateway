@@ -38,8 +38,8 @@ export default {
   },
 
   mailer: {
+    from: 'Shields <no-reply@example.com>',
     provider: 'mailgun',
-    from: { name: 'Punwave', address: 'no-reply@punwave.com' },
     mailgun: { auth: { api_key: process.env.MAILGUN_SECRET, domain: process.env.MAILGUN_DOMAIN } }
   },
 
