@@ -5,13 +5,13 @@ import mgTransport from 'nodemailer-mailgun-transport'
 import _ from 'lodash'
 import config from '../../config'
 
-const templateDir = path.join(__dirname, 'templates')
-
-function MailerService (options, dependencies = { nodemailer }) {
-  const mailer = options || config.mailer
-  const transporter = nodemailer.createTransport(mgTransport(mailer[mailer.provider]))
+function MailerService (options = config.mailer) {
+  const templatesDir = path.join(__dirname, 'templates')
 
   const mailerService = {}
+
+  mailerService.options = options
+  mailerService.transporter = nodemailer.createTransport(mgTransport(options[options.provider]))
 
   /**
    * Send email.
@@ -24,10 +24,9 @@ function MailerService (options, dependencies = { nodemailer }) {
    * @param  {string}   options.html - The HTML body of the email.
    * @return {Promise}  The result of sending mail.
    */
-  mailerService.send = (options) => {
-    const from = `${mailer.from.name} <${mailer.from.address}>`
-    options = Object.assign({ from }, options)
-    return transporter.sendMail(options)
+  mailerService.send = (options = {}) => {
+    options.from = options.from || mailerService.options.from
+    return mailerService.transporter.sendMail(options)
   }
 
   /**
@@ -38,7 +37,7 @@ function MailerService (options, dependencies = { nodemailer }) {
    */
   mailerService.sendPasswordResetEmail = (user) => {
     const { email: to, profile, passwordReset } = user
-    const template = fs.readFileSync(path.join(templateDir, 'password_reset.html'), 'utf-8')
+    const template = fs.readFileSync(path.join(templatesDir, 'password_reset.html'), 'utf-8')
     const compiled = _.template(template)
     const html = compiled({ name: profile.name, url: `${config.baseUrl}/password/reset/${passwordReset.token}` })
     const options = { to, html }
