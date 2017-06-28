@@ -1,7 +1,9 @@
 import error from 'http-errors'
-import oauth from '../../services/oauth'
+import ClientService from '../../services/oauth/client'
 
-function ClientController (dependencies = {}) {
+function ClientController (dependencies = { clientService: ClientService() }) {
+  const { clientService } = dependencies
+
   const clientController = {}
 
   /**
@@ -9,7 +11,7 @@ function ClientController (dependencies = {}) {
    * Find all clients.
    */
   clientController.index = async (req, res) => {
-    const clients = await oauth.getClients()
+    const clients = await clientService.getClients()
     res.status(200).json(clients)
   }
 
@@ -18,7 +20,7 @@ function ClientController (dependencies = {}) {
    * Create a new client.
    */
   clientController.create = async (req, res) => {
-    const client = await oauth.createClient(req.body)
+    const client = await clientService.createClient(req.body)
     res.status(201).json(client)
   }
 
@@ -27,7 +29,7 @@ function ClientController (dependencies = {}) {
    * Find one client by ID.
    */
   clientController.show = async (req, res) => {
-    const client = await oauth.getClientById(req.params.id)
+    const client = await clientService.getClientById(req.params.id)
     if (!client) throw error(404)
     res.status(200).json(client)
   }
@@ -37,7 +39,7 @@ function ClientController (dependencies = {}) {
    * Update an existing client by ID.
    */
   clientController.update = async (req, res) => {
-    const client = await oauth.updateClient(req.params.id, req.body)
+    const client = await clientService.updateClient(req.params.id, req.body)
     if (!client) throw error(404)
     res.status(200).json(client)
   }
@@ -47,7 +49,7 @@ function ClientController (dependencies = {}) {
    * Destroy an existing client by ID.
    */
   clientController.destroy = async (req, res) => {
-    const client = await oauth.deleteClient(req.params.id)
+    const client = await clientService.deleteClient(req.params.id)
     if (!client) throw error(404)
     res.status(200).json({ id: client.id, deleted: true })
   }
