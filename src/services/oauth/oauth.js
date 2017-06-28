@@ -14,7 +14,7 @@ const container = {
 }
 
 function OAuthService (dependencies = container) {
-  const { OAuthClient, OAuthCode, OAuthToken, authService } = container
+  const { OAuthClient, OAuthCode, OAuthToken, authService } = dependencies
 
   const oauthService = {}
 
