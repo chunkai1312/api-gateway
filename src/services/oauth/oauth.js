@@ -1,14 +1,21 @@
 import uuid from 'uuid/v4'
 import jwt from 'jsonwebtoken'
-import OAuthClient from '../../models/oauth_client'
-import OAuthToken from '../../models/oauth_token'
-import OAuthCode from '../../models/oauth_code'
+import OAuthClientRepository from '../../repositories/oauth_client'
+import OAuthCodeRepository from '../../repositories/oauth_code'
+import OAuthTokenRepository from '../../repositories/oauth_token'
 import AuthService from '../../services/auth'
 import config from '../../config'
 
-const authService = AuthService()
+const container = {
+  OAuthClient: OAuthClientRepository(),
+  OAuthCode: OAuthCodeRepository(),
+  OAuthToken: OAuthTokenRepository(),
+  authService: AuthService()
+}
 
-function OAuthService (dependencies = {}) {
+function OAuthService (dependencies = container) {
+  const { OAuthClient, OAuthCode, OAuthToken, authService } = container
+
   const oauthService = {}
 
   const createToken = (options = { expiresIn: 3600, subject: '' }) => {
@@ -60,7 +67,7 @@ function OAuthService (dependencies = {}) {
    */
   oauthService.getAccessToken = async (accessToken) => {
     const jwt = verifyToken(accessToken)
-    const token = await OAuthToken.findOne({ accessToken: jwt.jti })
+    const token = await OAuthToken.getAccessToken(jwt.jti)
     return token
   }
 
@@ -69,7 +76,7 @@ function OAuthService (dependencies = {}) {
    */
   oauthService.getRefreshToken = async (refreshToken) => {
     const jwt = verifyToken(refreshToken)
-    const token = await OAuthToken.findOne({ refreshToken: jwt.jti })
+    const token = await OAuthToken.getRefreshToken(jwt.jti)
     return token
   }
 
@@ -78,13 +85,7 @@ function OAuthService (dependencies = {}) {
    */
   oauthService.getAuthorizationCode = async (authorizationCode) => {
     const jwt = verifyToken(authorizationCode)
-
-    const authCode = await OAuthCode
-      .findOneAndRemove({ authorizationCode: jwt.jti })
-      .populate('client')
-      .populate('user')
-      .exec()
-
+    const authCode = await OAuthCode.getAuthorizationCode(jwt.jti)
     return authCode
   }
 
@@ -92,8 +93,7 @@ function OAuthService (dependencies = {}) {
    * Retrieve a client using a client id or a client id/client secret combination.
    */
   oauthService.getClient = async (clientId, clientSecret) => {
-    const query = clientSecret ? { clientId, clientSecret } : { clientId }
-    const client = await OAuthClient.findOne(query)
+    const client = await OAuthClient.getClient(clientId, clientSecret)
     return client
   }
 
@@ -117,44 +117,30 @@ function OAuthService (dependencies = {}) {
    */
   oauthService.saveToken = async (token, client, user) => {
     const decodedAccessToken = jwt.decode(token.accessToken)
-
-    const accessToken = new OAuthToken({
+    const accessToken = {
       accessToken: decodedAccessToken.jti,
       client: client.id,
       user: user ? user.id : null,
       scope: token.scope,
       expiresAt: decodedAccessToken.exp * 1000
-    })
-
-    if (!token.refreshToken) {
-      await accessToken.save()
-
-      return {
-        accessToken: accessToken.accessToken,
-        accessTokenExpiresAt: accessToken.expiresAt,
-        scope: accessToken.scope,
-        client: { id: accessToken.client },
-        user: { id: accessToken.user }
-      }
     }
 
-    const decodedRefreshToken = jwt.decode(token.refreshToken)
-
-    const refreshToken = new OAuthToken({
+    const decodedRefreshToken = token.refreshToken ? jwt.decode(token.refreshToken) : null
+    const refreshToken = decodedRefreshToken ? {
       refreshToken: decodedRefreshToken.jti,
       client: client.id,
       user: user.id,
       scope: token.scope,
       expiresAt: decodedRefreshToken.exp * 1000
-    })
+    } : null
 
-    await [accessToken.save(), refreshToken.save()]
+    await [ OAuthToken.saveAccessToken(accessToken), OAuthToken.saveRefreshToken(refreshToken) ]
 
     return {
       accessToken: accessToken.accessToken,
       accessTokenExpiresAt: accessToken.expiresAt,
-      refreshToken: refreshToken.refreshToken,
-      refreshTokenExpiresAt: refreshToken.expiresAt,
+      refreshToken: refreshToken ? refreshToken.refreshToken : undefined,
+      refreshTokenExpiresAt: refreshToken ? refreshToken.expiresAt : undefined,
       scope: accessToken.scope,
       client: { id: accessToken.client },
       user: { id: accessToken.user }
@@ -167,15 +153,16 @@ function OAuthService (dependencies = {}) {
   oauthService.saveAuthorizationCode = async (code, client, user) => {
     const { jti, exp } = jwt.decode(code.authorizationCode)
 
-    const authCode = new OAuthCode({
+    const authCode = {
       authorizationCode: jti,
       expiresAt: exp * 1000,
       redirectUri: code.redirectUri,
       scope: code.scope,
       client: client.id,
       user: user.id
-    })
-    await authCode.save()
+    }
+
+    await OAuthCode.saveAuthorizationCode(authCode)
 
     return authCode
   }
@@ -185,7 +172,7 @@ function OAuthService (dependencies = {}) {
    */
   oauthService.revokeToken = async (token) => {
     const { refreshToken } = token
-    const removed = await OAuthToken.findOneAndRemove({ refreshToken })
+    const removed = await OAuthToken.removeRefreshToken(refreshToken)
     return !!removed
   }
 
