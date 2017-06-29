@@ -11,7 +11,7 @@ function AuthController (dependencies = { authService: AuthService() }) {
    * Login page.
    */
   authController.getLogin = async (req, res) => {
-    res.render(req.route.path)
+    res.render(req.url)
   }
 
   /**
@@ -57,7 +57,7 @@ function AuthController (dependencies = { authService: AuthService() }) {
    * Signup page.
    */
   authController.getSignup = async (req, res) => {
-    res.render(req.route.path)
+    res.render(req.url)
   }
 
   /**

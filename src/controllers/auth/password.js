@@ -10,7 +10,7 @@ function PasswordController (dependencies = { authService: AuthService() }) {
    * Forgot Password page.
    */
   passwordController.getForgot = async (req, res) => {
-    res.render(req.route.path)
+    res.render(req.url)
   }
 
   /**
@@ -46,7 +46,7 @@ function PasswordController (dependencies = { authService: AuthService() }) {
       return res.redirect('/password/forgot')
     }
 
-    res.render(req.route.path, { username: user.username })
+    res.render(req.url, { username: user.username })
   }
 
   /**
