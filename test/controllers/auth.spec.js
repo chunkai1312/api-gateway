@@ -111,7 +111,7 @@ describe('AuthController', () => {
     })
   })
 
-  describe.only('#postSignup()', () => {
+  describe('#postSignup()', () => {
     it('should handle user signup', async () => {
       const req = httpMocks.createRequest({
         method: 'POST',
