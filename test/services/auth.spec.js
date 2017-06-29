@@ -14,7 +14,7 @@ function setup () {
     createUser: jest.fn(() => Promise.resolve({})),
     getUser: jest.fn(() => Promise.resolve({})),
     getUserByPasswordResetToken: jest.fn(() => Promise.resolve({})),
-    save: jest.fn()
+    save: jest.fn(() => Promise.resolve({}))
   }
 
   return { pw, mailer, OAuthUser }
