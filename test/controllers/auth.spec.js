@@ -115,7 +115,7 @@ describe('AuthController', () => {
     it('should handle user signup', async () => {
       const req = httpMocks.createRequest({
         method: 'POST',
-        url: '/login',
+        url: '/signup',
         login: jest.fn(),
         flash: jest.fn(),
         assert: jest.fn(() => ({ notEmpty: jest.fn(), isEmail: jest.fn(), len: jest.fn(), equals: jest.fn() })),
@@ -138,7 +138,7 @@ describe('AuthController', () => {
     it('should redirect to back when validation error occurs', async () => {
       const req = httpMocks.createRequest({
         method: 'POST',
-        url: '/login',
+        url: '/signup',
         login: jest.fn(),
         flash: jest.fn(),
         assert: jest.fn(() => ({ notEmpty: jest.fn(), isEmail: jest.fn(), len: jest.fn(), equals: jest.fn() })),
@@ -161,7 +161,7 @@ describe('AuthController', () => {
     it('should redirect to back when creating user error occurs', async () => {
       const req = httpMocks.createRequest({
         method: 'POST',
-        url: '/login',
+        url: '/signup',
         login: jest.fn(),
         flash: jest.fn(),
         assert: jest.fn(() => ({ notEmpty: jest.fn(), isEmail: jest.fn(), len: jest.fn(), equals: jest.fn() })),
