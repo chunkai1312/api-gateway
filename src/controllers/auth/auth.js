@@ -19,10 +19,10 @@ function AuthController (dependencies = { authService: AuthService() }) {
    * Sign in using username/email and password.
    */
   authController.postLogin = async (req, res) => {
-    req.assert('login', 'Username/Email cannot be blank').notEmpty()
+    req.assert('identifier', 'Username/Email cannot be blank').notEmpty()
     req.assert('password', 'Password cannot be blank').notEmpty()
     if (validator.isEmail(req.body.login)) {
-      req.sanitize('login').normalizeEmail({ gmail_remove_dots: false })
+      req.sanitize('identifier').normalizeEmail({ gmail_remove_dots: false })
     }
 
     const errors = req.validationErrors()
@@ -31,8 +31,8 @@ function AuthController (dependencies = { authService: AuthService() }) {
       return res.redirect('/login')
     }
 
-    const { login, password } = req.body
-    const user = await authService.authenticate(login, password)
+    const { identifier, password } = req.body
+    const user = await authService.authenticate(identifier, password)
     if (!user) {
       req.flash('errors', { msg: 'Invalid username/email or password' })
       return res.redirect('/login')

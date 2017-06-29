@@ -39,8 +39,8 @@ class Login extends Component {
         <form action="/login" method="POST">
           <div>
             <TextField
-              id="login"
-              name="login"
+              id="identifier"
+              name="identifier"
               type="text"
               floatingLabelText="Username / Email"
               errorText={showErrorText('login')}
