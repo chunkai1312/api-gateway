@@ -1,31 +1,31 @@
-import OAuthUser from '../../src/models/oauth_user'
-import MailerService from '../../src/services/mailer'
 import AuthService from '../../src/services/auth'
 
-// mongoose.Collection.prototype.insert = function (docs, options, callback) {
-//   callback(null, docs)
-// }
+function setup () {
+  const pw = {
+    hash: jest.fn(() => Promise.resolve('hashed password')),
+    verify: jest.fn(() => Promise.resolve(true))
+  }
 
-const mockPw = {
-  hash: jest.fn(() => Promise.resolve('hashed password')),
-  verify: jest.fn(() => Promise.resolve(true))
-}
+  const mailer = {
+    sendPasswordResetEmail: jest.fn()
+  }
 
-const mockMailer = {
-  sendPasswordResetEmail: jest.fn()
-}
+  const OAuthUser = {
+    createUser: jest.fn(() => Promise.resolve({})),
+    getUser: jest.fn(() => Promise.resolve({})),
+    getUserByPasswordResetToken: jest.fn(() => Promise.resolve({})),
+    save: jest.fn()
+  }
 
-const mockOAuthUser = {
-  createUser: jest.fn((user) => new OAuthUser(user)),
-  getUser: jest.fn((identifier) => new OAuthUser()),
-  getUserByPasswordResetToken: jest.fn((token) => new OAuthUser()),
-  save: jest.fn((user) => new OAuthUser(user))
+  return { pw, mailer, OAuthUser }
 }
 
 describe('AuthService', () => {
   describe('#createUser()', () => {
     it('should create a new user', async () => {
-      const authService = AuthService({ pw: mockPw, mailer: mockMailer, OAuthUser: mockOAuthUser })
+      const { pw, mailer, OAuthUser } = setup()
+
+      const authService = AuthService({ pw, mailer, OAuthUser })
       const data = {
         firstName: 'Test',
         lastName: 'User',
@@ -33,47 +33,52 @@ describe('AuthService', () => {
         email: 'test@example.com',
         password: '123qwe'
       }
-      const user = await authService.createUser(data)
-      expect(mockPw.hash).toHaveBeenCalled()
-      expect(mockOAuthUser.createUser).toHaveBeenCalled()
-      expect(user).toBeInstanceOf(OAuthUser)
-      expect(user.id).toBeDefined()
-      expect(user.username).toBe(data.username)
-      expect(user.password).toBe('hashed password')
-      expect(user.email).toBe(data.email)
-      expect(user.profile).toBeDefined()
-      expect(user.profile.firstName).toBe(data.firstName)
-      expect(user.profile.lastName).toBe(data.lastName)
-      expect(user.profile.name).toEqual(`${data.firstName} ${data.lastName}`)
+      await authService.createUser(data)
+
+      expect(pw.hash).toHaveBeenCalled()
+      expect(OAuthUser.createUser).toHaveBeenCalled()
     })
   })
 
   describe('#authenticate()', () => {
     it('should return a user instance when authenticated', async () => {
-      const mockPw = { verify: jest.fn(() => Promise.resolve(true)) }
-      const authService = AuthService({ pw: mockPw, mailer: mockMailer, OAuthUser: mockOAuthUser })
-      const user = await authService.authenticate('username', 'password')
-      expect(user).toBeInstanceOf(OAuthUser)
+      const { pw, mailer, OAuthUser } = setup()
+
+      const authService = AuthService({ pw, mailer, OAuthUser })
+      await authService.authenticate('username', 'password')
+
+      expect(OAuthUser.getUser).toHaveBeenCalled()
+      expect(pw.verify).toHaveBeenCalled()
     })
 
     it('should return null when authenticated', async () => {
-      const mockPw = { verify: jest.fn(() => Promise.resolve(false)) }
-      const authService = AuthService({ pw: mockPw, mailer: mockMailer, OAuthUser: mockOAuthUser })
+      const { pw, mailer, OAuthUser } = setup()
+      pw.verify = jest.fn(() => Promise.resolve(false))
+
+      const authService = AuthService({ pw, mailer, OAuthUser })
       const user = await authService.authenticate('username', 'password')
+
+      expect(OAuthUser.getUser).toHaveBeenCalled()
+      expect(pw.verify).toHaveBeenCalled()
       expect(user).toBe(null)
     })
   })
 
   describe('#forgotPassword()', () => {
-    it('should return a user instance when the email address was found', async () => {
-      const authService = AuthService({ pw: mockPw, mailer: mockMailer, OAuthUser: mockOAuthUser })
-      const user = await authService.forgotPassword('test@example.com')
-      expect(user).toBeInstanceOf(OAuthUser)
+    it('should send password reset email and return a user instance when the email address was found', async () => {
+      const { pw, mailer, OAuthUser } = setup()
+
+      const authService = AuthService({ pw, mailer, OAuthUser })
+      await authService.forgotPassword('test@example.com')
+
+      expect(mailer.sendPasswordResetEmail).toHaveBeenCalled()
     })
 
     it('should return null when the email address was not found', async () => {
-      mockOAuthUser.getUser = jest.fn((identifier) => null)
-      const authService = AuthService({ pw: mockPw, mailer: mockMailer, OAuthUser: mockOAuthUser })
+      const { pw, mailer, OAuthUser } = setup()
+      OAuthUser.getUser = jest.fn((identifier) => null)
+
+      const authService = AuthService({ pw, mailer, OAuthUser })
       const user = await authService.forgotPassword('test@example.com')
       expect(user).toBe(null)
     })
@@ -81,32 +86,42 @@ describe('AuthService', () => {
 
   describe('#validatePasswordResetToken()', () => {
     it('should return a user instance when the password reset token is valid', async () => {
-      const authService = AuthService({ pw: mockPw, mailer: mockMailer, OAuthUser: mockOAuthUser })
-      const user = await authService.validatePasswordResetToken('password-rest-token')
-      expect(user).toBeInstanceOf(OAuthUser)
+      const { pw, mailer, OAuthUser } = setup()
+
+      const authService = AuthService({ pw, mailer, OAuthUser })
+      await authService.validatePasswordResetToken('password-rest-token')
+
+      expect(OAuthUser.getUserByPasswordResetToken).toHaveBeenCalled()
     })
 
     it('should return null when the password reset token is invalid', async () => {
-      mockOAuthUser.getUserByPasswordResetToken = jest.fn((token) => null)
-      const authService = AuthService({ pw: mockPw, mailer: mockMailer, OAuthUser: mockOAuthUser })
+      const { pw, mailer, OAuthUser } = setup()
+      OAuthUser.getUserByPasswordResetToken = jest.fn((token) => null)
+
+      const authService = AuthService({ pw, mailer, OAuthUser })
       const user = await authService.validatePasswordResetToken('password-rest-token')
+
       expect(user).toBe(null)
     })
   })
 
   describe('#resetPassword()', () => {
     it('should change password and return a user instance when the password reset token is valid', async () => {
-      mockOAuthUser.getUserByPasswordResetToken = jest.fn((token) => new OAuthUser())
-      const authService = AuthService({ pw: mockPw, mailer: mockMailer, OAuthUser: mockOAuthUser })
-      const user = await authService.resetPassword('password-rest-token', 'new-password')
-      expect(mockPw.hash).toHaveBeenCalled()
-      expect(user).toBeInstanceOf(OAuthUser)
+      const { pw, mailer, OAuthUser } = setup()
+
+      const authService = AuthService({ pw, mailer, OAuthUser })
+      await authService.resetPassword('password-rest-token', 'new-password')
+
+      expect(pw.hash).toHaveBeenCalled()
     })
 
     it('should return null when the password reset token is invalid', async () => {
-      mockOAuthUser.getUserByPasswordResetToken = jest.fn((token) => null)
-      const authService = AuthService({ pw: mockPw, mailer: mockMailer, OAuthUser: mockOAuthUser })
+      const { pw, mailer, OAuthUser } = setup()
+      OAuthUser.getUserByPasswordResetToken = jest.fn((token) => null)
+
+      const authService = AuthService({ pw, mailer, OAuthUser })
       const user = await authService.resetPassword('password-rest-token', 'new-password')
+
       expect(user).toBe(null)
     })
   })
