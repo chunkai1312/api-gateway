@@ -7,17 +7,18 @@ import AuthService from '../../services/auth'
 import config from '../../config'
 
 const container = {
-  OAuthClient: OAuthClientRepository(),
-  OAuthCode: OAuthCodeRepository(),
-  OAuthToken: OAuthTokenRepository(),
+  clientRepo: OAuthClientRepository(),
+  codeRepo: OAuthCodeRepository(),
+  tokenRepo: OAuthTokenRepository(),
   authService: AuthService()
 }
 
 function OAuthService (dependencies = container) {
-  const { OAuthClient, OAuthCode, OAuthToken, authService } = dependencies
+  const { clientRepo, codeRepo, tokenRepo, authService } = dependencies
 
   const oauthService = {}
 
+  /* istanbul ignore next */
   const createToken = (options = { expiresIn: 3600, subject: '' }) => {
     const jti = uuid()
     const sub = options.subject
@@ -67,7 +68,7 @@ function OAuthService (dependencies = container) {
    */
   oauthService.getAccessToken = async (accessToken) => {
     const jwt = verifyToken(accessToken)
-    const token = await OAuthToken.getAccessToken(jwt.jti)
+    const token = await tokenRepo.getAccessToken(jwt.jti)
     return token
   }
 
@@ -76,7 +77,7 @@ function OAuthService (dependencies = container) {
    */
   oauthService.getRefreshToken = async (refreshToken) => {
     const jwt = verifyToken(refreshToken)
-    const token = await OAuthToken.getRefreshToken(jwt.jti)
+    const token = await tokenRepo.getRefreshToken(jwt.jti)
     return token
   }
 
@@ -85,7 +86,7 @@ function OAuthService (dependencies = container) {
    */
   oauthService.getAuthorizationCode = async (authorizationCode) => {
     const jwt = verifyToken(authorizationCode)
-    const authCode = await OAuthCode.getAuthorizationCode(jwt.jti)
+    const authCode = await codeRepo.getAuthorizationCode(jwt.jti)
     return authCode
   }
 
@@ -93,7 +94,7 @@ function OAuthService (dependencies = container) {
    * Retrieve a client using a client id or a client id/client secret combination.
    */
   oauthService.getClient = async (clientId, clientSecret) => {
-    const client = await OAuthClient.getClient(clientId, clientSecret)
+    const client = await clientRepo.getClient(clientId, clientSecret)
     return client
   }
 
@@ -134,13 +135,13 @@ function OAuthService (dependencies = container) {
       expiresAt: decodedRefreshToken.exp * 1000
     } : null
 
-    await [ OAuthToken.saveAccessToken(accessToken), OAuthToken.saveRefreshToken(refreshToken) ]
+    await [ tokenRepo.saveAccessToken(accessToken), tokenRepo.saveRefreshToken(refreshToken) ]
 
     return {
       accessToken: accessToken.accessToken,
       accessTokenExpiresAt: accessToken.expiresAt,
-      refreshToken: refreshToken ? refreshToken.refreshToken : undefined,
-      refreshTokenExpiresAt: refreshToken ? refreshToken.expiresAt : undefined,
+      refreshToken: refreshToken ? refreshToken.refreshToken : null,
+      refreshTokenExpiresAt: refreshToken ? refreshToken.expiresAt : null,
       scope: accessToken.scope,
       client: { id: accessToken.client },
       user: { id: accessToken.user }
@@ -162,7 +163,7 @@ function OAuthService (dependencies = container) {
       user: user.id
     }
 
-    await OAuthCode.saveAuthorizationCode(authCode)
+    await codeRepo.saveAuthorizationCode(authCode)
 
     return authCode
   }
@@ -172,7 +173,7 @@ function OAuthService (dependencies = container) {
    */
   oauthService.revokeToken = async (token) => {
     const { refreshToken } = token
-    const removed = await OAuthToken.removeRefreshToken(refreshToken)
+    const removed = await tokenRepo.removeRefreshToken(refreshToken)
     return !!removed
   }
 
@@ -180,14 +181,20 @@ function OAuthService (dependencies = container) {
    * Revoke an authorization code.
    */
   oauthService.revokeAuthorizationCode = async (code) => {
-
+    const { authorizationCode } = code
+    const removed = await codeRepo.removeAuthorizationCode(authorizationCode)
+    return !!removed
   }
 
   /**
    * Check if the requested scope is valid for a particular client/user combination.
    */
   oauthService.validateScope = async (user, client, scope) => {
-
+    const VALID_SCOPES = ['offline_access']
+    return scope
+      .split(' ')
+      .filter(s => VALID_SCOPES.indexOf(s) >= 0)
+      .join(' ')
   }
 
   /**
