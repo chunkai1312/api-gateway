@@ -4,7 +4,6 @@ module.exports = {
   setupFiles: [
     '<rootDir>/test/setup.js'
   ],
-  setupTestFrameworkScriptFile: '<rootDir>/test/setupTestFramework.js',
   coveragePathIgnorePatterns: ['/src/config/'],
   coverageReporters: ['text', 'text-summary']
 }
