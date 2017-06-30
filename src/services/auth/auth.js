@@ -1,16 +1,16 @@
 import { randomBytes } from 'crypto'
 import credential from 'credential'
-import Mailer from '../../services/mailer'
+import MailerService from '../../services/mailer'
 import OAuthUserRepository from '../../repositories/oauth_user'
 
 const container = {
   pw: credential(),
-  mailer: new Mailer(),
-  OAuthUser: OAuthUserRepository()
+  mailerService: new MailerService(),
+  userRepo: OAuthUserRepository()
 }
 
 function AuthService (dependencies = container) {
-  const { pw, mailer, OAuthUser } = dependencies
+  const { pw, mailer, userRepo } = dependencies
 
   const authService = {}
 
@@ -23,39 +23,39 @@ function AuthService (dependencies = container) {
   authService.createUser = async ({ firstName, lastName, username, email, password }) => {
     const data = { username, password, email, profile: { firstName, lastName } }
     data.password = await pw.hash(password)
-    const user = await OAuthUser.createUser(data)
+    const user = await userRepo.createUser(data)
     return user
   }
 
   authService.authenticate = async (identifier, password) => {
-    const user = await OAuthUser.getUser(identifier)
+    const user = await userRepo.getUser(identifier)
     if (!user) return null
     const authenticated = await pw.verify(user.password, password)
     return authenticated ? user : null
   }
 
   authService.forgotPassword = async (email) => {
-    const user = await OAuthUser.getUser(email)
+    const user = await userRepo.getUser(email)
     if (user) {
       const passwordReset = await generatePasswordResetToken()
       user.passwordReset = passwordReset
-      await OAuthUser.save(user)
+      await userRepo.save(user)
       mailer.sendPasswordResetEmail(user)
     }
     return user
   }
 
   authService.validatePasswordResetToken = async (token) => {
-    const user = await OAuthUser.getUserByPasswordResetToken(token)
+    const user = await userRepo.getUserByPasswordResetToken(token)
     return user
   }
 
   authService.resetPassword = async (token, password) => {
-    const user = await OAuthUser.getUserByPasswordResetToken(token)
+    const user = await userRepo.getUserByPasswordResetToken(token)
     if (user) {
       user.password = await pw.hash(password)
       user.passwordReset = {}
-      await OAuthUser.save(user)
+      await userRepo.save(user)
     }
     return user
   }
