@@ -14,6 +14,11 @@ function setup () {
 }
 
 describe('MailerService', () => {
+  describe('#MailerService()', () => {
+    const mailerService = MailerService()
+    expect(mailerService).toBeInstanceOf(Object)
+  })
+
   describe('#send()', () => {
     it('should send mail and return message with success', async () => {
       const { settings } = setup()
