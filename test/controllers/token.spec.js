@@ -1,37 +1,47 @@
 import httpMocks from 'node-mocks-http'
+import OAuthService from '../../src/services/oauth/oauth'
 import TokenController from '../../src/controllers/api/token'
 
-const mockOAuthService = {
-  getAccessToken: jest.fn(() => {
-    return {
-      client: 'client-id',
-      user: 'user-id',
-      scope: 'offline_access',
-      expiresAt: Date.now()
-    }
-  }),
-  getRefreshToken: jest.fn(() => {
-    return {
-      client: 'client-id',
-      user: 'user-id',
-      scope: 'offline_access',
-      expiresAt: Date.now()
-    }
-  }),
-  revokeToken: jest.fn()
+jest.mock('../../src/repositories/oauth_token', () => require('../mocks/repositories/oauth_token'))
+
+function setup () {
+  const oauthService = OAuthService()
+  oauthService.getAccessToken = jest.fn(() => ({
+    client: 'client-id',
+    user: 'user-id',
+    scope: 'offline_access',
+    expiresAt: Date.now()
+  }))
+  oauthService.getRefreshToken = jest.fn(() => ({
+    client: 'client-id',
+    user: 'user-id',
+    scope: 'offline_access',
+    expiresAt: Date.now()
+  }))
+
+  return { oauthService }
 }
 
 describe('TokenController', () => {
+  describe('#TokenController()', () => {
+    it('should create a TokenController', () => {
+      const tokenController = TokenController()
+      expect(tokenController).toBeInstanceOf(Object)
+    })
+  })
+
   describe('#info()', () => {
     it('should respond 200 with token info', async () => {
+      const { oauthService } = setup()
+
       const req = httpMocks.createRequest({
         method: 'GET',
-        url: '/oauth/token/info',
+        url: '/oauth2/token/info',
         query: { access_token: 'access-token' }
       })
       const res = httpMocks.createResponse()
 
-      const tokenController = TokenController({ oauthService: mockOAuthService })
+      const tokenController = TokenController({ oauthService })
       await tokenController.info(req, res)
 
       expect(res._getStatusCode()).toBe(200)
@@ -44,18 +54,17 @@ describe('TokenController', () => {
     })
 
     it('should respond 400 when the access token is invalid', async () => {
-      mockOAuthService.getAccessToken = jest.fn(() => {
-        throw new Error()
-      })
+      const { oauthService } = setup()
+      oauthService.getAccessToken = jest.fn(() => { throw new Error() })
 
       const req = httpMocks.createRequest({
         method: 'GET',
-        url: '/oauth/token/info',
+        url: '/oauth2/token/info',
         query: { access_token: 'invalid-access-token' }
       })
       const res = httpMocks.createResponse()
 
-      const tokenController = TokenController({ oauthService: mockOAuthService })
+      const tokenController = TokenController({ oauthService })
       await tokenController.info(req, res)
 
       expect(res._getStatusCode()).toBe(400)
@@ -65,14 +74,16 @@ describe('TokenController', () => {
 
   describe('#revoke()', () => {
     it('should respond 200', async () => {
+      const { oauthService } = setup()
+
       const req = httpMocks.createRequest({
         method: 'GET',
-        url: '/oauth/token/revoke',
+        url: '/oauth2/token/revoke',
         query: { token: 'token' }
       })
       const res = httpMocks.createResponse()
 
-      const tokenController = TokenController({ oauthService: mockOAuthService })
+      const tokenController = TokenController({ oauthService })
       await tokenController.revoke(req, res)
 
       expect(res._getStatusCode()).toBe(200)
@@ -80,18 +91,17 @@ describe('TokenController', () => {
     })
 
     it('should respond 400 when the token is invalid', async () => {
-      mockOAuthService.getRefreshToken = jest.fn(() => {
-        throw new Error()
-      })
+      const { oauthService } = setup()
+      oauthService.getRefreshToken = jest.fn(() => { throw new Error() })
 
       const req = httpMocks.createRequest({
         method: 'GET',
-        url: '/oauth/token/revoke',
+        url: '/oauth2/token/revoke',
         query: { token: 'token' }
       })
       const res = httpMocks.createResponse()
 
-      const tokenController = TokenController({ oauthService: mockOAuthService })
+      const tokenController = TokenController({ oauthService })
       await tokenController.revoke(req, res)
 
       expect(res._getStatusCode()).toBe(400)
