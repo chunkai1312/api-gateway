@@ -15,8 +15,10 @@ function setup () {
 
 describe('MailerService', () => {
   describe('#MailerService()', () => {
-    const mailerService = MailerService()
-    expect(mailerService).toBeInstanceOf(Object)
+    it('should create a MailerService', () => {
+      const mailerService = MailerService()
+      expect(mailerService).toBeInstanceOf(Object)
+    })
   })
 
   describe('#send()', () => {
