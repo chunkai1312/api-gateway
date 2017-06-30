@@ -15,6 +15,11 @@ function setup () {
 }
 
 describe('AuthService', () => {
+  describe('#AuthService()', () => {
+    const authService = AuthService()
+    expect(authService).toBeInstanceOf(Object)
+  })
+
   describe('#createUser()', () => {
     it('should create a new user', async () => {
       const { pw, mailer, userRepo } = setup()
