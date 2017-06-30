@@ -24,7 +24,7 @@ function MailerService (options = config.mailer) {
    * @param  {string}   options.html - The HTML body of the email.
    * @return {Promise}  The result of sending mail.
    */
-  mailerService.send = (options = {}) => {
+  mailerService.send = (options) => {
     options.from = options.from || mailerService.options.from
     return mailerService.transporter.sendMail(options)
   }
