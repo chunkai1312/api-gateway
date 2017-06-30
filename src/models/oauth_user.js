@@ -19,6 +19,7 @@ const OAuthUserSchema = new mongoose.Schema({
   activated: { type: Boolean }
 }, { collection: 'oauth_users', timestamps: true })
 
+/* istanbul ignore next */
 OAuthUserSchema.virtual('profile.name')
   .get(function () {
     return `${this.profile.firstName} ${this.profile.lastName}`
