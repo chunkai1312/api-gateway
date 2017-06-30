@@ -1,5 +1,5 @@
 import credential from 'credential'
-import MailerService from '../../src/services/mailer'
+import mailerServiceService from '../../src/services/mailer'
 import OAuthUserRepository from '../../src/repositories/oauth_user'
 import OAuthUser from '../../src/models/oauth_user'
 import AuthService from '../../src/services/auth'
@@ -8,10 +8,10 @@ jest.mock('../../src/repositories/oauth_user', () => require('../mocks/repositor
 
 function setup () {
   const pw = credential()
-  const mailer = MailerService()
+  const mailerService = mailerServiceService()
   const userRepo = OAuthUserRepository()
 
-  return { pw, mailer, userRepo }
+  return { pw, mailerService, userRepo }
 }
 
 describe('AuthService', () => {
@@ -24,10 +24,10 @@ describe('AuthService', () => {
 
   describe('#createUser()', () => {
     it('should create a new user', async () => {
-      const { pw, mailer, userRepo } = setup()
+      const { pw, mailerService, userRepo } = setup()
       pw.hash = jest.fn(() => Promise.resolve('hashed-password'))
 
-      const authService = AuthService({ pw, mailer, userRepo })
+      const authService = AuthService({ pw, mailerService, userRepo })
       const data = {
         firstName: 'Test',
         lastName: 'User',
@@ -44,10 +44,10 @@ describe('AuthService', () => {
 
   describe('#authenticate()', () => {
     it('should return a user instance when authenticated', async () => {
-      const { pw, mailer, userRepo } = setup()
+      const { pw, mailerService, userRepo } = setup()
       pw.verify = jest.fn(() => Promise.resolve(true))
 
-      const authService = AuthService({ pw, mailer, userRepo })
+      const authService = AuthService({ pw, mailerService, userRepo })
       const user = await authService.authenticate('username', 'password')
 
       expect(pw.verify).toHaveBeenCalled()
@@ -55,20 +55,20 @@ describe('AuthService', () => {
     })
 
     it('should return null if the user was not found', async () => {
-      const { pw, mailer, userRepo } = setup()
+      const { pw, mailerService, userRepo } = setup()
       userRepo.getUser = jest.fn(() => Promise.resolve(null))
 
-      const authService = AuthService({ pw, mailer, userRepo })
+      const authService = AuthService({ pw, mailerService, userRepo })
       const user = await authService.authenticate('username', 'password')
 
       expect(user).toBe(null)
     })
 
     it('should return null if the password is incorrec', async () => {
-      const { pw, mailer, userRepo } = setup()
+      const { pw, mailerService, userRepo } = setup()
       pw.verify = jest.fn(() => Promise.resolve(false))
 
-      const authService = AuthService({ pw, mailer, userRepo })
+      const authService = AuthService({ pw, mailerService, userRepo })
       const user = await authService.authenticate('username', 'password')
 
       expect(pw.verify).toHaveBeenCalled()
@@ -78,21 +78,21 @@ describe('AuthService', () => {
 
   describe('#forgotPassword()', () => {
     it('should send password reset email and return a user instance when the email address was found', async () => {
-      const { pw, mailer, userRepo } = setup()
-      mailer.sendPasswordResetEmail = jest.fn()
+      const { pw, mailerService, userRepo } = setup()
+      mailerService.sendPasswordResetEmail = jest.fn()
 
-      const authService = AuthService({ pw, mailer, userRepo })
+      const authService = AuthService({ pw, mailerService, userRepo })
       const user = await authService.forgotPassword('test@example.com')
 
-      expect(mailer.sendPasswordResetEmail).toHaveBeenCalled()
+      expect(mailerService.sendPasswordResetEmail).toHaveBeenCalled()
       expect(user).toBeInstanceOf(OAuthUser)
     })
 
     it('should return null when the email address was not found', async () => {
-      const { pw, mailer, userRepo } = setup()
+      const { pw, mailerService, userRepo } = setup()
       userRepo.getUser = jest.fn(() => Promise.resolve(null))
 
-      const authService = AuthService({ pw, mailer, userRepo })
+      const authService = AuthService({ pw, mailerService, userRepo })
       const user = await authService.forgotPassword('test@example.com')
 
       expect(user).toBe(null)
@@ -101,19 +101,19 @@ describe('AuthService', () => {
 
   describe('#validatePasswordResetToken()', () => {
     it('should return a user instance when the password reset token is valid', async () => {
-      const { pw, mailer, userRepo } = setup()
+      const { pw, mailerService, userRepo } = setup()
 
-      const authService = AuthService({ pw, mailer, userRepo })
+      const authService = AuthService({ pw, mailerService, userRepo })
       const user = await authService.validatePasswordResetToken('password-rest-token')
 
       expect(user).toBeInstanceOf(OAuthUser)
     })
 
     it('should return null when the password reset token is invalid', async () => {
-      const { pw, mailer, userRepo } = setup()
+      const { pw, mailerService, userRepo } = setup()
       userRepo.getUserByPasswordResetToken = jest.fn((token) => null)
 
-      const authService = AuthService({ pw, mailer, userRepo })
+      const authService = AuthService({ pw, mailerService, userRepo })
       const user = await authService.validatePasswordResetToken('password-rest-token')
 
       expect(user).toBe(null)
@@ -122,10 +122,10 @@ describe('AuthService', () => {
 
   describe('#resetPassword()', () => {
     it('should change password and return a user instance when the password reset token is valid', async () => {
-      const { pw, mailer, userRepo } = setup()
+      const { pw, mailerService, userRepo } = setup()
       pw.hash = jest.fn(() => Promise.resolve('hashed-password'))
 
-      const authService = AuthService({ pw, mailer, userRepo })
+      const authService = AuthService({ pw, mailerService, userRepo })
       const user = await authService.resetPassword('password-rest-token', 'new-password')
 
       expect(pw.hash).toHaveBeenCalled()
@@ -133,10 +133,10 @@ describe('AuthService', () => {
     })
 
     it('should return null when the password reset token is invalid', async () => {
-      const { pw, mailer, userRepo } = setup()
+      const { pw, mailerService, userRepo } = setup()
       userRepo.getUserByPasswordResetToken = jest.fn(() => Promise.resolve(null))
 
-      const authService = AuthService({ pw, mailer, userRepo })
+      const authService = AuthService({ pw, mailerService, userRepo })
       const user = await authService.resetPassword('password-rest-token', 'new-password')
 
       expect(user).toBe(null)
