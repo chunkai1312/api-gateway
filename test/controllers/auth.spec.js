@@ -56,9 +56,10 @@ describe('AuthController', () => {
       await authController.postLogin(req, res)
 
       expect(req.login).toHaveBeenCalled()
+      expect(res._getRedirectUrl()).toBe('/')
     })
 
-    it('should redirect to specific url if session is set', async () => {
+    it('should redirect to specific url if the session "returnTo" is set', async () => {
       const { authService } = setup()
 
       const req = httpMocks.createRequest({
@@ -77,6 +78,7 @@ describe('AuthController', () => {
       await authController.postLogin(req, res)
 
       expect(req.login).toHaveBeenCalled()
+      expect(res._getRedirectUrl()).toBe('https://www.example.com')
     })
 
     it('should normalize email address if identifier using email', async () => {
@@ -93,11 +95,13 @@ describe('AuthController', () => {
         validationErrors: jest.fn(() => false)
       })
       const res = httpMocks.createResponse()
+      jest.spyOn(res, 'redirect')
 
       const authController = AuthController({ authService })
       await authController.postLogin(req, res)
 
       expect(req.login).toHaveBeenCalled()
+      expect(res._getRedirectUrl()).toBe('/')
     })
 
     it('should redirect to back if form validation error occurs', async () => {
@@ -200,6 +204,7 @@ describe('AuthController', () => {
       await authController.postSignup(req, res)
 
       expect(req.login).toHaveBeenCalled()
+      expect(res._getRedirectUrl()).toBe('/')
     })
 
     it('should redirect to back if validation error occurs', async () => {
