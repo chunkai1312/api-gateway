@@ -18,14 +18,14 @@ function OAuthTokenRepository (dependencies = { OAuthToken }) {
   }
 
   /**
-   * Save access token
+   * Save access token.
    */
   tokenRepository.saveAccessToken = (accessToken) => {
     return OAuthToken.create(accessToken)
   }
 
   /**
-   * Save refresh token
+   * Save refresh token.
    */
   tokenRepository.saveRefreshToken = (refreshToken) => {
     if (!refreshToken) return
@@ -33,7 +33,7 @@ function OAuthTokenRepository (dependencies = { OAuthToken }) {
   }
 
   /**
-   * Remove refresh token
+   * Remove refresh token.
    */
   tokenRepository.removeRefreshToken = (refreshToken) => {
     return OAuthToken.findOneAndRemove({ refreshToken })
