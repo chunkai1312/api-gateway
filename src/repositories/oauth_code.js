@@ -21,6 +21,13 @@ function OAuthCodeRepository (dependencies = { OAuthCode }) {
     return OAuthCode.create(authCode)
   }
 
+  /**
+   * Remove authorization code.
+   */
+  codeRepository.removeAuthorizationCode = (authorizationCode) => {
+    return OAuthCode.findOneAndRemove({ authorizationCode })
+  }
+
   return codeRepository
 }
 
