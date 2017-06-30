@@ -16,8 +16,10 @@ function setup () {
 
 describe('AuthService', () => {
   describe('#AuthService()', () => {
-    const authService = AuthService()
-    expect(authService).toBeInstanceOf(Object)
+    it('should create an AuthService', () => {
+      const authService = AuthService()
+      expect(authService).toBeInstanceOf(Object)
+    })
   })
 
   describe('#createUser()', () => {
