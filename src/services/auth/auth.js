@@ -10,7 +10,7 @@ const container = {
 }
 
 function AuthService (dependencies = container) {
-  const { pw, mailer, userRepo } = dependencies
+  const { pw, mailerService, userRepo } = dependencies
 
   const authService = {}
 
@@ -40,7 +40,7 @@ function AuthService (dependencies = container) {
       const passwordReset = await generatePasswordResetToken()
       user.passwordReset = passwordReset
       await userRepo.save(user)
-      mailer.sendPasswordResetEmail(user)
+      mailerService.sendPasswordResetEmail(user)
     }
     return user
   }
