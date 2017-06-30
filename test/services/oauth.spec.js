@@ -30,8 +30,10 @@ function setup () {
 
 describe('OAuthService', () => {
   describe('#OAuthService()', () => {
-    const oauthService = OAuthService()
-    expect(oauthService).toBeInstanceOf(Object)
+    it('should create an OAuthService', () => {
+      const oauthService = OAuthService()
+      expect(oauthService).toBeInstanceOf(Object)
+    })
   })
 
   describe('#generateAccessToken()', () => {
