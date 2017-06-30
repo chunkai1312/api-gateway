@@ -21,7 +21,7 @@ function AuthController (dependencies = { authService: AuthService() }) {
   authController.postLogin = async (req, res) => {
     req.assert('identifier', 'Username/Email cannot be blank').notEmpty()
     req.assert('password', 'Password cannot be blank').notEmpty()
-    if (validator.isEmail(req.body.login)) {
+    if (validator.isEmail(req.body.identifier)) {
       req.sanitize('identifier').normalizeEmail({ gmail_remove_dots: false })
     }
 
