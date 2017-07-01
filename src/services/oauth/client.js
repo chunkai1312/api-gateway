@@ -28,7 +28,7 @@ function ClientService (dependencies = {}) {
     return client
   }
 
-  clientService.getClients = async (id) => {
+  clientService.deleteClient = async (id) => {
     const client = await OAuthClient.findById(id)
     if (client) await client.delete()
     return client
