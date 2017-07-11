@@ -3,7 +3,7 @@ import mongooseHidden from 'mongoose-hidden'
 import mongooseDelete from 'mongoose-delete'
 
 const OAuthTokenSchema = new mongoose.Schema({
-  accessToken: { type: String, unique: true },
+  accessToken: { type: String },
   refreshToken: { type: String },
   client: { type: mongoose.Schema.Types.ObjectId, ref: 'OAuthClient', required: true },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'OAuthUser' },
