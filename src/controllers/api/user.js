@@ -11,7 +11,7 @@ function UserController (dependencies = { userService: UserService() }) {
    * Find all users.
    */
   userController.index = async (req, res) => {
-    const users = await userService.getClients()
+    const users = await userService.getUsers()
     res.status(200).json(users)
   }
 
@@ -20,7 +20,7 @@ function UserController (dependencies = { userService: UserService() }) {
    * Create a new user.
    */
   userController.create = async (req, res) => {
-    const user = await userService.createClient(req.body)
+    const user = await userService.createUser(req.body)
     res.status(201).json(user)
   }
 
@@ -29,7 +29,7 @@ function UserController (dependencies = { userService: UserService() }) {
    * Find one user by ID.
    */
   userController.show = async (req, res) => {
-    const user = await userService.getClientById(req.params.id)
+    const user = await userService.getUserById(req.params.id)
     if (!user) throw error(404)
     res.status(200).json(user)
   }
@@ -39,7 +39,7 @@ function UserController (dependencies = { userService: UserService() }) {
    * Update an existing user by ID.
    */
   userController.update = async (req, res) => {
-    const user = await userService.updateClient(req.params.id, req.body)
+    const user = await userService.updateUser(req.params.id, req.body)
     if (!user) throw error(404)
     res.status(200).json(user)
   }
@@ -49,7 +49,7 @@ function UserController (dependencies = { userService: UserService() }) {
    * Destroy an existing user by ID.
    */
   userController.destroy = async (req, res) => {
-    const user = await userService.deleteClient(req.params.id)
+    const user = await userService.deleteUser(req.params.id)
     if (!user) throw error(404)
     res.status(200).json({ id: user.id, deleted: true })
   }
